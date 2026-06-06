@@ -2,9 +2,9 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:executing-plans to implement this plan task-by-task.
 
-**Goal:** 按照五週 Harness Engineering 手冊，生成一組漸進式、自包含的 Python 代碼文件夾，每個文件夾對應一個學習單元，可獨立運行。
+**Goal:** 按照五週 Harness Engineering 手冊,生成一組漸進式,自包含的 Python 代碼文件夾,每個文件夾對應一個學習單元,可獨立運行.
 
-**Architecture:** 根目錄 `config.py` 集中管理 DeepSeek API 配置；每個 weekX_dayY 文件夾自包含（複製繼承文件 + 新增當日文件）；新增內容用 `# === 第X週第Y天新增 ===` 標記；所有文件有詳細中文注釋。
+**Architecture:** 根目錄 `config.py` 集中管理 DeepSeek API 配置;每個 weekX_dayY 文件夾自包含(複製繼承文件 + 新增當日文件);新增內容用 `# === 第X週第Y天新增 ===` 標記;所有文件有詳細中文注釋.
 
 **Tech Stack:** Python 3.10+, anthropic SDK (指向 DeepSeek), pydantic, langchain>=1,<2, langgraph>=1,<2, langsmith, langchain-openai
 

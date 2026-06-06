@@ -1,5 +1,5 @@
-"""week2_day4/agent.py — 繼承自 week2_day3/agent.py，本日未修改。
-（week2_day4 的重點是 failure_modes.py，agent 本身不變）
+"""week2_day4/agent.py - 繼承自 week2_day3/agent.py,本日未修改.
+(week2_day4 的重點是 failure_modes.py,agent 本身不變)
 """
 import sys, os
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
@@ -11,7 +11,7 @@ from tools import TOOLS, dispatch_tools
 client = anthropic.Anthropic()
 
 def run_agent(user_msg: str, max_turns: int = 6, verbose: bool = True) -> str:
-    """完整的 Agent 循環（詳細注釋見 week2_day3/agent.py）"""
+    """完整的 Agent 循環(詳細注釋見 week2_day3/agent.py)"""
     messages = [{"role": "user", "content": user_msg}]
     for turn in range(max_turns):
         if verbose:
@@ -30,7 +30,7 @@ def run_agent(user_msg: str, max_turns: int = 6, verbose: bool = True) -> str:
             tool_results = dispatch_tools(resp.content)
             if verbose:
                 names = [b.name for b in resp.content if b.type == "tool_use"]
-                print(f"[Agent 第 {turn + 1} 輪] 執行工具：{names}")
+                print(f"[Agent 第 {turn + 1} 輪] 執行工具:{names}")
             messages.append({"role": "user", "content": tool_results})
             continue
         break

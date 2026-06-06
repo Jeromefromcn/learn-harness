@@ -1,16 +1,16 @@
 """
 week4_day4/run_eval.py
 =======================
-第四週 Day 4：完整評估流水線
+第四週 Day 4:完整評估流水線
 
-對應手冊任務：
-  - 串聯前三天的組件：加載數據集 → 跑 agent → 算指標 + judge → 輸出報告
-  - 做一次真實迭代：改一個 prompt 或護欄，重跑，用數字判斷是否變好
-  - 報告輸出可讀的格式（Markdown 或 HTML 表格）
+對應手冊任務:
+  - 串聯前三天的組件:加載數據集 -> 跑 agent -> 算指標 + judge -> 輸出報告
+  - 做一次真實迭代:改一個 prompt 或護欄,重跑,用數字判斷是否變好
+  - 報告輸出可讀的格式(Markdown 或 HTML 表格)
 
-這是 harness engineering 裡「持續評估」的具體形態：
-  每次改動都有數字依據，而不是靠「感覺變好了」。
-  這也是你和「只會寫 prompt 不做評估」的人之間的核心差距。
+這是 harness engineering 裡"持續評估"的具體形態:
+  每次改動都有數字依據,而不是靠"感覺變好了".
+  這也是你和"只會寫 prompt 不做評估"的人之間的核心差距.
 """
 
 import sys
@@ -30,11 +30,11 @@ client = anthropic.Anthropic()
 
 
 # ============================================================
-# 精簡版 agent（評估用）
+# 精簡版 agent(評估用)
 # ============================================================
 
 def _run_agent_simple(question: str, max_turns: int = 6) -> tuple[str, list[str]]:
-    """評估用的精簡 agent，返回 (最終文字, 調用工具列表)"""
+    """評估用的精簡 agent,返回 (最終文字, 調用工具列表)"""
     from tools import TOOLS, dispatch_tools
     messages = [{"role": "user", "content": question}]
     tools_called = []
@@ -59,7 +59,7 @@ def _run_agent_simple(question: str, max_turns: int = 6) -> tuple[str, list[str]
 
 
 # ============================================================
-# 評估工具函數（從 metrics.py 和 judge.py 複製，保持自包含）
+# 評估工具函數(從 metrics.py 和 judge.py 複製,保持自包含)
 # ============================================================
 
 def _check_tool_selection(actual: list[str], expected: list[str]) -> dict:
@@ -87,11 +87,11 @@ def _check_output(answer: str, acceptable: list[str]) -> dict:
 
 
 def _judge_answer(question: str, answer: str) -> int:
-    """快速 judge：只返回分數（1-5）"""
+    """快速 judge:只返回分數(1-5)"""
     import re
     prompt = (
-        f"評估 agent 回答質量，只輸出 JSON: {{\"score\": <1-5>}}\n"
-        f"問題：{question}\n回答：{answer[:200]}"
+        f"評估 agent 回答質量,只輸出 JSON: {{\"score\": <1-5>}}\n"
+        f"問題:{question}\n回答:{answer[:200]}"
     )
     try:
         resp = client.messages.create(
@@ -105,7 +105,7 @@ def _judge_answer(question: str, answer: str) -> int:
 
 
 # ============================================================
-# === 第四週第四天新增：完整流水線 ===
+# === 第四週第四天新增:完整流水線 ===
 # ============================================================
 
 def run_full_evaluation(
@@ -115,12 +115,12 @@ def run_full_evaluation(
     verbose: bool = True,
 ) -> list[dict]:
     """
-    完整評估流水線：加載 → 跑 agent → 算指標 → judge → 返回結果。
+    完整評估流水線:加載 -> 跑 agent -> 算指標 -> judge -> 返回結果.
 
     Args:
         dataset:   評估案例列表
-        run_judge: 是否運行 LLM-as-judge（耗費額外 API 調用）
-        max_cases: 最多評估幾個案例（None = 全部）
+        run_judge: 是否運行 LLM-as-judge(耗費額外 API 調用)
+        max_cases: 最多評估幾個案例(None = 全部)
         verbose:   是否打印進度
 
     Returns:
@@ -129,7 +129,7 @@ def run_full_evaluation(
     cases = dataset[:max_cases] if max_cases else dataset
     results = []
 
-    print(f"\n開始評估（{len(cases)} 個案例，judge={'開啟' if run_judge else '關閉'}）")
+    print(f"\n開始評估({len(cases)} 個案例,judge={'開啟' if run_judge else '關閉'})")
     print("-" * 60)
 
     for i, case in enumerate(cases, 1):
@@ -141,7 +141,7 @@ def run_full_evaluation(
             answer, tools_called = _run_agent_simple(case["question"])
         except Exception as e:
             results.append({**case, "error": str(e), "passed": False})
-            print(f"  ❌ 錯誤：{str(e)[:50]}")
+            print(f"  ❌ 錯誤:{str(e)[:50]}")
             continue
 
         elapsed = round(time.time() - t0, 2)
@@ -183,8 +183,8 @@ def generate_markdown_report(
     run_name: str = "eval",
 ) -> str:
     """
-    把評估結果生成 Markdown 格式的報告。
-    這份報告可以貼到 GitHub PR 或 README 裡作為基準線。
+    把評估結果生成 Markdown 格式的報告.
+    這份報告可以貼到 GitHub PR 或 README 裡作為基準線.
     """
     total = len(results)
     passed = sum(1 for r in results if r.get("passed", False))
@@ -198,8 +198,8 @@ def generate_markdown_report(
 
     ts = datetime.now().strftime("%Y-%m-%d %H:%M")
     lines = [
-        f"# 評估報告：{run_name}",
-        f"**生成時間：** {ts}  **模型：** {DEFAULT_MODEL}",
+        f"# 評估報告:{run_name}",
+        f"**生成時間:** {ts}  **模型:** {DEFAULT_MODEL}",
         "",
         "## 總覽",
         f"| 指標 | 數值 |",
@@ -240,12 +240,12 @@ def generate_markdown_report(
 
 
 # ============================================================
-# 主程序：完整的「改 → 測 → 比較」迭代循環
+# 主程序:完整的"改 -> 測 -> 比較"迭代循環
 # ============================================================
 
 if __name__ == "__main__":
     print("=" * 60)
-    print("Week 4 Day 4：完整評估流水線")
+    print("Week 4 Day 4:完整評估流水線")
     print("=" * 60)
 
     # 加載數據集
@@ -257,7 +257,7 @@ if __name__ == "__main__":
     from eval_dataset import load_dataset
     dataset = load_dataset(str(dataset_path))
 
-    # 運行評估（取前 15 個案例控制費用）
+    # 運行評估(取前 15 個案例控制費用)
     results = run_full_evaluation(dataset, run_judge=True, max_cases=15, verbose=True)
 
     # 生成報告
@@ -277,9 +277,9 @@ if __name__ == "__main__":
         for r in results:
             f.write(json.dumps(r, ensure_ascii=False) + "\n")
 
-    print(f"\n下一步（真實迭代）：")
-    print("  1. 分析失敗案例，找一個共同原因")
+    print(f"\n下一步(真實迭代):")
+    print("  1. 分析失敗案例,找一個共同原因")
     print("  2. 修改 tools.py 的 description 或 guardrail.py 的提示詞")
     print("  3. 重新跑這個腳本")
-    print("  4. 比較兩次報告的數字——這就是 eval-driven 開發")
-    print("\nDay 4 完成。下一步：week4_day5 — 寫成案例，讓別人理解你做了什麼。")
+    print("  4. 比較兩次報告的數字--這就是 eval-driven 開發")
+    print("\nDay 4 完成.下一步:week4_day5 - 寫成案例,讓別人理解你做了什麼.")

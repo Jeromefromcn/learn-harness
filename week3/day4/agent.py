@@ -1,11 +1,11 @@
 """
 week3_day4/agent.py
 ====================
-在 week3_day3/agent.py 基礎上，加入優雅降級。
+在 week3_day3/agent.py 基礎上,加入優雅降級.
 
 === 第三週第四天修改 ===
-  - 構建三級降級策略鏈：Pro → Flash → 靜態兜底
-  - 斷路器開路 or 超時時走降級鏈，而不是直接返回錯誤
+  - 構建三級降級策略鏈:Pro -> Flash -> 靜態兜底
+  - 斷路器開路 or 超時時走降級鏈,而不是直接返回錯誤
 """
 
 import sys, os, time
@@ -27,16 +27,16 @@ from fallback import FallbackChain, build_default_fallback_chain, static_fallbac
 client = anthropic.Anthropic()
 llm_breaker = CircuitBreaker(failure_threshold=3, recovery_timeout=60.0)
 
-# 默認降級鏈：Pro → Flash → 靜態兜底
+# 默認降級鏈:Pro -> Flash -> 靜態兜底
 _fallback_chain = build_default_fallback_chain()
 
 
 def _llm_loop(user_msg: str, system: str | None, max_turns: int,
               verbose: bool, conversation_id: str) -> str:
     """
-    內部的 LLM 循環邏輯（不含降級）。
-    降級邏輯在 run_agent 外層處理。
-    這樣分離讓降級策略可以替換整個循環，而不是嵌入其中。
+    內部的 LLM 循環邏輯(不含降級).
+    降級邏輯在 run_agent 外層處理.
+    這樣分離讓降級策略可以替換整個循環,而不是嵌入其中.
     """
     from config import DEFAULT_MODEL
     messages = [{"role": "user", "content": user_msg}]
@@ -79,27 +79,27 @@ def run_agent(
     messages_for_fallback = [{"role": "user", "content": user_msg}]
 
     if verbose:
-        print(f"\n[Agent W3D4] 開始執行（帶降級策略鏈）...")
+        print(f"\n[Agent W3D4] 開始執行(帶降級策略鏈)...")
 
     try:
         # 嘗試正常的 LLM 循環
         final_text = _llm_loop(user_msg, system, max_turns, verbose, conversation_id)
     except (CircuitOpenError, TimeoutError, Exception) as e:
-        # === 第三週第四天新增：失敗時走降級鏈 ===
-        print(f"[Fallback] 主循環失敗（{type(e).__name__}），啟動降級策略鏈...")
+        # === 第三週第四天新增:失敗時走降級鏈 ===
+        print(f"[Fallback] 主循環失敗({type(e).__name__}),啟動降級策略鏈...")
         try:
-            # 降級鏈嘗試次級模型，最壞情況返回靜態文字
+            # 降級鏈嘗試次級模型,最壞情況返回靜態文字
             final_text, level = _fallback_chain.execute(messages_for_fallback, TOOLS)
             print(f"[Fallback] 第 {level+1} 級策略成功")
         except Exception as fallback_e:
-            print(f"[Fallback] 所有策略失敗：{fallback_e}")
-            return "系統繁忙，請稍後再試。"
+            print(f"[Fallback] 所有策略失敗:{fallback_e}")
+            return "系統繁忙,請稍後再試."
 
     if output_schema:
         try:
             return validate_output(final_text, output_schema)
         except ValidationError as e:
-            print(f"[Agent] 輸出校驗失敗：{e}")
+            print(f"[Agent] 輸出校驗失敗:{e}")
             return final_text
 
     return final_text
@@ -107,8 +107,8 @@ def run_agent(
 
 if __name__ == "__main__":
     print("=" * 55)
-    print("Week 3 Day 4：帶降級策略的 Agent")
+    print("Week 3 Day 4:帶降級策略的 Agent")
     print("=" * 55)
     result = run_agent("查一下 SF456 的物流狀態")
-    print(f"\n結果：{result[:150] if isinstance(result, str) else result}")
-    print("\nDay 4 完成：優雅降級策略鏈已接入 agent。")
+    print(f"\n結果:{result[:150] if isinstance(result, str) else result}")
+    print("\nDay 4 完成:優雅降級策略鏈已接入 agent.")

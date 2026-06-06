@@ -1,14 +1,14 @@
 """
 week3_day5/agent.py
 ====================
-在 week3_day4/agent.py 基礎上，加入成本追蹤。
+在 week3_day4/agent.py 基礎上,加入成本追蹤.
 
 === 第三週第五天修改 ===
-  - 每次調用後記錄成本（calc_cost）
+  - 每次調用後記錄成本(calc_cost)
   - Agent 結束時打印本次對話的成本報告
-  - 新增 run_agent_with_report：返回結果 + 成本摘要
+  - 新增 run_agent_with_report:返回結果 + 成本摘要
 
-Week 3 最終版：包含所有可靠性層：
+Week 3 最終版:包含所有可靠性層:
   ✅ 重試 + 指數退避
   ✅ 斷路器
   ✅ 可觀測性日誌
@@ -46,17 +46,17 @@ def run_agent(
     conversation_id: str = "",
 ) -> tuple[BaseModel | str, dict]:
     """
-    Week 3 最終版：帶所有可靠性層的 Agent 循環。
+    Week 3 最終版:帶所有可靠性層的 Agent 循環.
 
     Returns:
-        (result, cost_report) 元組：
-          - result:      模型的最終回答（Pydantic 對象或字符串）
+        (result, cost_report) 元組:
+          - result:      模型的最終回答(Pydantic 對象或字符串)
           - cost_report: 本次會話的成本摘要字典
     """
     system = SYSTEM_PROMPT_WITH_JSON_CONSTRAINT if output_schema else None
     messages = [{"role": "user", "content": user_msg}]
 
-    # === 第三週第五天新增：初始化成本追蹤器 ===
+    # === 第三週第五天新增:初始化成本追蹤器 ===
     tracker = SessionCostTracker(session_id=conversation_id or str(uuid.uuid4())[:8])
 
     final_text = ""
@@ -80,10 +80,10 @@ def run_agent(
             record = log_call(messages, resp, t0,
                               conversation_id=conversation_id, turn_number=turn + 1)
 
-            # === 第三週第五天新增：記錄本輪成本 ===
+            # === 第三週第五天新增:記錄本輪成本 ===
             call_cost = tracker.record(resp)
             if verbose:
-                print(f"[Cost] 本輪費用：¥{call_cost.cost_cny:.4f}")
+                print(f"[Cost] 本輪費用:¥{call_cost.cost_cny:.4f}")
 
             messages.append({"role": "assistant", "content": resp.content})
 
@@ -98,11 +98,11 @@ def run_agent(
             break
 
     except (CircuitOpenError, TimeoutError, Exception) as e:
-        print(f"[Fallback] 主循環失敗，啟動降級...")
+        print(f"[Fallback] 主循環失敗,啟動降級...")
         try:
             final_text, level = _fallback_chain.execute(messages[:1], TOOLS)
         except Exception:
-            final_text = "系統繁忙，請稍後再試。"
+            final_text = "系統繁忙,請稍後再試."
 
     # 生成成本報告
     cost_report = tracker.report()
@@ -120,18 +120,18 @@ def run_agent(
 
 if __name__ == "__main__":
     print("=" * 55)
-    print("Week 3 Day 5：完整可靠性層 Agent（最終版）")
+    print("Week 3 Day 5:完整可靠性層 Agent(最終版)")
     print("=" * 55)
 
     result, cost = run_agent(
-        "5kg 包裹寄到 B 區多少錢？SF123 現在在哪裡？SKU-9 有貨嗎？",
+        "5kg 包裹寄到 B 區多少錢?SF123 現在在哪裡?SKU-9 有貨嗎?",
         output_schema=None,
         conversation_id="w3d5-demo",
     )
 
-    print(f"\n最終回答：")
+    print(f"\n最終回答:")
     print(result[:300] if isinstance(result, str) else str(result))
 
     print("\n" + "=" * 55)
-    print("Week 3 全部完成！你的 agent 已具備生產就緒的可靠性層。")
-    print("下一步：week4_day1 — 評估數據集，進入真正的差距。")
+    print("Week 3 全部完成!你的 agent 已具備生產就緒的可靠性層.")
+    print("下一步:week4_day1 - 評估數據集,進入真正的差距.")

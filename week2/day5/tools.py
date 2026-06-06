@@ -1,4 +1,4 @@
-"""week2_day5/tools.py — 繼承自 week2_day1/tools.py，本日未修改。"""
+"""week2_day5/tools.py - 繼承自 week2_day1/tools.py,本日未修改."""
 import sys, os
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 
@@ -16,9 +16,9 @@ def track_shipment(tracking_no: str) -> dict:
 def calc_shipping_fee(weight_kg: float, zone: str) -> dict:
     zone_rates = {"A": 18, "B": 24, "C": 32}
     if weight_kg <= 0:
-        raise ValueError(f"重量必須為正數，收到：{weight_kg}")
+        raise ValueError(f"重量必須為正數,收到:{weight_kg}")
     if zone not in zone_rates:
-        return {"error": f"未知區域 '{zone}'，可選值：A / B / C"}
+        return {"error": f"未知區域 '{zone}',可選值:A / B / C"}
     rate = zone_rates[zone]
     fee = round(weight_kg * rate + 30, 2)
     return {"fee_hkd": fee, "weight_kg": weight_kg, "zone": zone,
@@ -34,19 +34,19 @@ def check_inventory(sku: str) -> dict:
 
 TOOLS = [
     {"name": "track_shipment",
-     "description": "查詢物流追蹤號的當前狀態和預計送達時間。",
+     "description": "查詢物流追蹤號的當前狀態和預計送達時間.",
      "input_schema": {"type": "object",
                       "properties": {"tracking_no": {"type": "string"}},
                       "required": ["tracking_no"]}},
     {"name": "calc_shipping_fee",
-     "description": "根據包裹重量和目的地區域計算運費（港幣）。",
+     "description": "根據包裹重量和目的地區域計算運費(港幣).",
      "input_schema": {"type": "object",
                       "properties": {
                           "weight_kg": {"type": "number"},
                           "zone": {"type": "string", "enum": ["A", "B", "C"]}},
                       "required": ["weight_kg", "zone"]}},
     {"name": "check_inventory",
-     "description": "查詢指定商品 SKU 的庫存數量。",
+     "description": "查詢指定商品 SKU 的庫存數量.",
      "input_schema": {"type": "object",
                       "properties": {"sku": {"type": "string"}},
                       "required": ["sku"]}},
@@ -67,6 +67,6 @@ def dispatch_tools(content: list) -> list:
             try:
                 result = tool_fn(**block.input)
             except Exception as e:
-                result = {"error": f"工具執行失敗：{str(e)}"}
+                result = {"error": f"工具執行失敗:{str(e)}"}
         results.append({"type": "tool_result", "tool_use_id": block.id, "content": str(result)})
     return results

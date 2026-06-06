@@ -1,8 +1,8 @@
 """
 week2_day2/tools.py
 ====================
-繼承自 week2_day1/tools.py，本日未修改。
-（自包含文件夾設計：複製一份，確保每天的文件夾可以獨立運行）
+繼承自 week2_day1/tools.py,本日未修改.
+(自包含文件夾設計:複製一份,確保每天的文件夾可以獨立運行)
 """
 
 import sys
@@ -26,9 +26,9 @@ def track_shipment(tracking_no: str) -> dict:
 def calc_shipping_fee(weight_kg: float, zone: str) -> dict:
     zone_rates = {"A": 18, "B": 24, "C": 32}
     if weight_kg <= 0:
-        raise ValueError(f"重量必須為正數，收到：{weight_kg}")
+        raise ValueError(f"重量必須為正數,收到:{weight_kg}")
     if zone not in zone_rates:
-        return {"error": f"未知區域 '{zone}'，可選值：A / B / C"}
+        return {"error": f"未知區域 '{zone}',可選值:A / B / C"}
     rate = zone_rates[zone]
     fee = round(weight_kg * rate + 30, 2)
     return {"fee_hkd": fee, "weight_kg": weight_kg, "zone": zone,
@@ -47,35 +47,35 @@ def check_inventory(sku: str) -> dict:
 TOOLS = [
     {
         "name": "track_shipment",
-        "description": "查詢物流追蹤號的當前狀態和預計送達時間。當用戶詢問包裹在哪裡、何時送到時使用。",
+        "description": "查詢物流追蹤號的當前狀態和預計送達時間.當用戶詢問包裹在哪裡,何時送到時使用.",
         "input_schema": {
             "type": "object",
             "properties": {
-                "tracking_no": {"type": "string", "description": "物流追蹤號，例如 SF123"}
+                "tracking_no": {"type": "string", "description": "物流追蹤號,例如 SF123"}
             },
             "required": ["tracking_no"],
         },
     },
     {
         "name": "calc_shipping_fee",
-        "description": "根據包裹重量和目的地區域計算運費（港幣）。區域分 A/B/C 三檔。",
+        "description": "根據包裹重量和目的地區域計算運費(港幣).區域分 A/B/C 三檔.",
         "input_schema": {
             "type": "object",
             "properties": {
-                "weight_kg": {"type": "number", "description": "包裹重量，單位：公斤"},
+                "weight_kg": {"type": "number", "description": "包裹重量,單位:公斤"},
                 "zone": {"type": "string", "enum": ["A", "B", "C"],
-                         "description": "目的地區域：A（港九）、B（新界）、C（離島）"},
+                         "description": "目的地區域:A(港九),B(新界),C(離島)"},
             },
             "required": ["weight_kg", "zone"],
         },
     },
     {
         "name": "check_inventory",
-        "description": "查詢指定商品 SKU 的庫存數量。",
+        "description": "查詢指定商品 SKU 的庫存數量.",
         "input_schema": {
             "type": "object",
             "properties": {
-                "sku": {"type": "string", "description": "商品 SKU 編號，例如 SKU-1"}
+                "sku": {"type": "string", "description": "商品 SKU 編號,例如 SKU-1"}
             },
             "required": ["sku"],
         },
@@ -84,7 +84,7 @@ TOOLS = [
 
 
 def dispatch_tools(content: list) -> list:
-    """執行模型請求的工具調用，返回 tool_result 格式列表。"""
+    """執行模型請求的工具調用,返回 tool_result 格式列表."""
     tool_map = {
         "track_shipment":    track_shipment,
         "calc_shipping_fee": calc_shipping_fee,
@@ -101,7 +101,7 @@ def dispatch_tools(content: list) -> list:
             try:
                 result = tool_fn(**block.input)
             except Exception as e:
-                result = {"error": f"工具執行失敗：{str(e)}"}
+                result = {"error": f"工具執行失敗:{str(e)}"}
         results.append({
             "type": "tool_result",
             "tool_use_id": block.id,

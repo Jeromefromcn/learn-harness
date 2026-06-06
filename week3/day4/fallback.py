@@ -1,24 +1,24 @@
 """
 week3_day4/fallback.py
 =======================
-第三週 Day 4：優雅降級（Graceful Degradation）
+第三週 Day 4:優雅降級(Graceful Degradation)
 
-對應手冊任務：
-  - 設計降級策略：主模型失敗 → 切換到更小/更快的模型
-  - 再失敗 → 返回緩存結果或「請稍後再試」的安全響應
-  - 把上週「等一下才答」的問題接上降級路徑，確認系統不崩潰
+對應手冊任務:
+  - 設計降級策略:主模型失敗 -> 切換到更小/更快的模型
+  - 再失敗 -> 返回緩存結果或"請稍後再試"的安全響應
+  - 把上週"等一下才答"的問題接上降級路徑,確認系統不崩潰
 
-核心概念：
-  優雅降級 = 系統在部分故障時，能降低服務質量但不完全失去功能。
+核心概念:
+  優雅降級 = 系統在部分故障時,能降低服務質量但不完全失去功能.
 
-  類比你做 SRE 時的經驗：
-    主數據庫掛了 → 讀緩存（舊數據） → 至少不是 500 錯誤
-    CDN 故障 → 直接打源站 → 慢但能用
+  類比你做 SRE 時的經驗:
+    主數據庫掛了 -> 讀緩存(舊數據) -> 至少不是 500 錯誤
+    CDN 故障 -> 直接打源站 -> 慢但能用
 
-  在 LLM 系統裡：
-    Pro 模型超時 → 切 Flash 模型（便宜但能用）
-    Flash 也掛 → 返回緩存的常見問題答案
-    緩存也沒有 → 返回「系統繁忙，請稍後重試」的安全響應
+  在 LLM 系統裡:
+    Pro 模型超時 -> 切 Flash 模型(便宜但能用)
+    Flash 也掛 -> 返回緩存的常見問題答案
+    緩存也沒有 -> 返回"系統繁忙,請稍後重試"的安全響應
 """
 
 import sys
@@ -33,34 +33,34 @@ import anthropic
 
 
 # ============================================================
-# === 第三週第四天新增：降級策略鏈 ===
+# === 第三週第四天新增:降級策略鏈 ===
 # ============================================================
 
 class FallbackExhaustedError(Exception):
-    """所有降級選項都試過了，還是失敗。"""
+    """所有降級選項都試過了,還是失敗."""
     pass
 
 
 class FallbackChain:
     """
-    降級策略鏈。
+    降級策略鏈.
 
-    把多個策略按優先級排列：
-      1. 主模型（Pro，能力最強）
-      2. 次級模型（Flash，便宜快速）
-      3. 緩存響應（離線，無 API 依賴）
-      4. 安全兜底（靜態文字，永不失敗）
+    把多個策略按優先級排列:
+      1. 主模型(Pro,能力最強)
+      2. 次級模型(Flash,便宜快速)
+      3. 緩存響應(離線,無 API 依賴)
+      4. 安全兜底(靜態文字,永不失敗)
 
-    每個策略失敗時自動嘗試下一個，直到所有策略耗盡。
-    整個過程對調用方透明：它只知道最終得到了一個結果，
-    不知道（也不需要知道）用了哪個降級路徑。
+    每個策略失敗時自動嘗試下一個,直到所有策略耗盡.
+    整個過程對調用方透明:它只知道最終得到了一個結果,
+    不知道(也不需要知道)用了哪個降級路徑.
     """
 
     def __init__(self, strategies: list, verbose: bool = True):
         """
         Args:
-            strategies: 降級策略列表，按優先級從高到低排列
-                        每個策略是一個 callable，返回結果或拋異常
+            strategies: 降級策略列表,按優先級從高到低排列
+                        每個策略是一個 callable,返回結果或拋異常
             verbose:    是否打印降級日誌
         """
         self.strategies = strategies
@@ -69,10 +69,10 @@ class FallbackChain:
 
     def execute(self, *args, **kwargs) -> tuple[any, int]:
         """
-        依次嘗試策略鏈中的每個策略。
+        依次嘗試策略鏈中的每個策略.
 
         Returns:
-            (result, strategy_index): 成功的結果和使用的策略序號（0=主策略）
+            (result, strategy_index): 成功的結果和使用的策略序號(0=主策略)
             strategy_index > 0 表示發生了降級
 
         Raises:
@@ -93,13 +93,13 @@ class FallbackChain:
                 if self.verbose:
                     print(
                         f"[Fallback] 第 {i+1} 級策略失敗 "
-                        f"（{type(e).__name__}: {str(e)[:60]}）"
-                        + ("，嘗試下一級..." if i < len(self.strategies) - 1 else "")
+                        f"({type(e).__name__}: {str(e)[:60]})"
+                        + (",嘗試下一級..." if i < len(self.strategies) - 1 else "")
                     )
 
         raise FallbackExhaustedError(
-            f"所有 {len(self.strategies)} 個降級策略都失敗。"
-            f"最後一個錯誤：{last_error}"
+            f"所有 {len(self.strategies)} 個降級策略都失敗."
+            f"最後一個錯誤:{last_error}"
         )
 
 
@@ -109,14 +109,14 @@ class FallbackChain:
 
 def make_llm_strategy(model: str, timeout_sec: float = 30.0):
     """
-    創建一個使用指定模型的 LLM 調用策略。
+    創建一個使用指定模型的 LLM 調用策略.
 
     Args:
         model:       模型 ID
-        timeout_sec: 超時時間（秒）
+        timeout_sec: 超時時間(秒)
 
     Returns:
-        一個 callable，接受 messages 列表，返回響應文字
+        一個 callable,接受 messages 列表,返回響應文字
     """
     client = anthropic.Anthropic()
 
@@ -130,33 +130,33 @@ def make_llm_strategy(model: str, timeout_sec: float = 30.0):
                 messages=messages,
                 tools=tools or [],
             )
-            # 簡化：只返回文字內容
+            # 簡化:只返回文字內容
             for block in resp.content:
                 if hasattr(block, "text"):
                     return block.text
             return ""
 
         result = call_with_timeout(_call, timeout_sec=timeout_sec)
-        print(f"[Fallback] 使用模型：{model}，耗時限制：{timeout_sec}秒")
+        print(f"[Fallback] 使用模型:{model},耗時限制:{timeout_sec}秒")
         return result
 
     strategy.__name__ = f"llm_{model}"
     return strategy
 
 
-# 靜態緩存響應（最後的安全兜底）
+# 靜態緩存響應(最後的安全兜底)
 STATIC_FALLBACK_RESPONSES = {
-    "shipping": "抱歉，物流查詢系統暫時不可用，請稍後重試或致電客服 400-XXX-XXXX。",
-    "inventory": "庫存系統暫時維護中，請稍後查詢。",
-    "fee": "運費計算暫時不可用，標準運費請參考網站費率表。",
-    "default": "系統繁忙，請稍後再試。感謝您的耐心等待。",
+    "shipping": "抱歉,物流查詢系統暫時不可用,請稍後重試或致電客服 400-XXX-XXXX.",
+    "inventory": "庫存系統暫時維護中,請稍後查詢.",
+    "fee": "運費計算暫時不可用,標準運費請參考網站費率表.",
+    "default": "系統繁忙,請稍後再試.感謝您的耐心等待.",
 }
 
 
 def static_fallback_strategy(messages: list, tools: list = None) -> str:
     """
-    靜態兜底策略：永不失敗，但只能返回預設文字。
-    這是降級鏈的最後一道防線。
+    靜態兜底策略:永不失敗,但只能返回預設文字.
+    這是降級鏈的最後一道防線.
     """
     user_content = ""
     for m in messages:
@@ -176,10 +176,10 @@ def static_fallback_strategy(messages: list, tools: list = None) -> str:
 # 構建默認的降級策略鏈
 def build_default_fallback_chain() -> FallbackChain:
     """
-    構建生產環境的降級策略鏈（3 個層級）：
-      Level 0：Pro 模型（30秒超時）
-      Level 1：Flash 模型（10秒超時）
-      Level 2：靜態兜底（永不失敗）
+    構建生產環境的降級策略鏈(3 個層級):
+      Level 0:Pro 模型(30秒超時)
+      Level 1:Flash 模型(10秒超時)
+      Level 2:靜態兜底(永不失敗)
     """
     return FallbackChain(
         strategies=[
@@ -197,14 +197,14 @@ def build_default_fallback_chain() -> FallbackChain:
 if __name__ == "__main__":
     print("=== 降級策略測試 ===\n")
 
-    # 測試：靜態兜底策略（不需要 API）
-    print("測試靜態兜底策略（不需要 API 調用）：")
+    # 測試:靜態兜底策略(不需要 API)
+    print("測試靜態兜底策略(不需要 API 調用):")
     messages = [{"role": "user", "content": "查一下 SF123 的物流狀態"}]
     result = static_fallback_strategy(messages)
-    print(f"  → {result}")
+    print(f"  -> {result}")
 
-    # 測試：策略鏈（前兩個策略故意失敗，最後用靜態兜底）
-    print("\n測試策略鏈（前兩個策略故意失敗）：")
+    # 測試:策略鏈(前兩個策略故意失敗,最後用靜態兜底)
+    print("\n測試策略鏈(前兩個策略故意失敗):")
 
     def always_fail_strategy(messages, tools=None):
         raise RuntimeError("模擬主模型宕機")
@@ -220,8 +220,8 @@ if __name__ == "__main__":
         ]
     )
     result, level = test_chain.execute(messages)
-    print(f"  ✅ 最終使用第 {level+1} 級策略（靜態兜底）")
-    print(f"  → {result}")
+    print(f"  ✅ 最終使用第 {level+1} 級策略(靜態兜底)")
+    print(f"  -> {result}")
 
-    print("\nDay 4 完成。優雅降級策略鏈就緒。")
-    print("下一步：week3_day5/cost_tracker.py — Token 成本追蹤。")
+    print("\nDay 4 完成.優雅降級策略鏈就緒.")
+    print("下一步:week3_day5/cost_tracker.py - Token 成本追蹤.")

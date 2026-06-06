@@ -1,11 +1,11 @@
 """
 week3_day3/agent.py
 ====================
-在 week3_day2/agent.py 基礎上，加入結構化可觀測性日誌。
+在 week3_day2/agent.py 基礎上,加入結構化可觀測性日誌.
 
 === 第三週第三天修改 ===
-  - 每次調用前記錄 t0，調用後立即調用 log_call()
-  - 每個 turn 都有完整的記錄：輸入 hash、延遲、token、stop_reason
+  - 每次調用前記錄 t0,調用後立即調用 log_call()
+  - 每個 turn 都有完整的記錄:輸入 hash,延遲,token,stop_reason
 """
 
 import sys, os, time
@@ -26,7 +26,7 @@ from observability import log_call, SessionCostTracker
 client = anthropic.Anthropic()
 llm_breaker = CircuitBreaker(failure_threshold=3, recovery_timeout=60.0)
 
-# 簡易成本追蹤（為 Day 5 做鋪墊，這裡先放進來）
+# 簡易成本追蹤(為 Day 5 做鋪墊,這裡先放進來)
 class MockCostTracker:
     def record(self, resp): pass
 
@@ -61,13 +61,13 @@ def run_agent(
             print(f"\n[Agent W3D3 第 {turn + 1} 輪] 調用模型...")
 
         try:
-            # === 第三週第三天新增：記錄開始時間 ===
+            # === 第三週第三天新增:記錄開始時間 ===
             t0 = time.time()
 
             resp = llm_breaker.call(call_with_timeout, _call_model_raw,
                                     30.0, messages, TOOLS, system)
 
-            # === 第三週第三天新增：記錄調用詳情 ===
+            # === 第三週第三天新增:記錄調用詳情 ===
             record = log_call(messages, resp, t0,
                               conversation_id=conversation_id, turn_number=turn + 1)
             if verbose:
@@ -76,10 +76,10 @@ def run_agent(
                       f"stop={record.stop_reason}")
 
         except CircuitOpenError as e:
-            print(f"[Agent] 斷路器開路：{e}")
-            return "系統暫時不可用，請稍後再試。"
+            print(f"[Agent] 斷路器開路:{e}")
+            return "系統暫時不可用,請稍後再試."
         except Exception as e:
-            print(f"[Agent] 調用失敗：{e}")
+            print(f"[Agent] 調用失敗:{e}")
             return f"[錯誤] {str(e)[:100]}"
 
         messages.append({"role": "assistant", "content": resp.content})
@@ -102,10 +102,10 @@ def run_agent(
 if __name__ == "__main__":
     import uuid
     print("=" * 55)
-    print("Week 3 Day 3：帶可觀測性的 Agent")
+    print("Week 3 Day 3:帶可觀測性的 Agent")
     print("=" * 55)
     conv_id = str(uuid.uuid4())[:8]
-    result = run_agent("SF123 的物流狀態怎麼樣？", conversation_id=conv_id)
-    print(f"\n結果：{result[:150] if isinstance(result, str) else result}")
-    print(f"\n提示：查看 agent_calls.jsonl 文件，應該有這次調用的記錄。")
-    print("用 `cat agent_calls.jsonl | python -m json.tool` 格式化查看。")
+    result = run_agent("SF123 的物流狀態怎麼樣?", conversation_id=conv_id)
+    print(f"\n結果:{result[:150] if isinstance(result, str) else result}")
+    print(f"\n提示:查看 agent_calls.jsonl 文件,應該有這次調用的記錄.")
+    print("用 `cat agent_calls.jsonl | python -m json.tool` 格式化查看.")

@@ -1,12 +1,12 @@
 """
 week3_day1/agent.py
 ====================
-在 week2_day5/agent.py 基礎上，加入重試 + 指數退避。
+在 week2_day5/agent.py 基礎上,加入重試 + 指數退避.
 
 === 第三週第一天修改 ===
   - 用 @with_retry 包裝 client.messages.create() 調用
   - 區分可重試和不可重試的異常
-  - 新增 retry_with_llm_feedback：校驗失敗時把錯誤反饋給模型
+  - 新增 retry_with_llm_feedback:校驗失敗時把錯誤反饋給模型
 """
 
 import sys
@@ -35,8 +35,8 @@ client = anthropic.Anthropic()
 @with_retry(max_attempts=3, base_delay=1.0)
 def _call_model(messages: list, tools: list, system: str | None) -> anthropic.types.Message:
     """
-    帶重試的 API 調用。用裝飾器包裝，讓 run_agent 保持簡潔。
-    只有這一層知道重試邏輯，上層的 run_agent 不需要關心。
+    帶重試的 API 調用.用裝飾器包裝,讓 run_agent 保持簡潔.
+    只有這一層知道重試邏輯,上層的 run_agent 不需要關心.
     """
     kwargs = {"model": DEFAULT_MODEL, "max_tokens": 1024,
               "tools": tools, "messages": messages}
@@ -51,15 +51,15 @@ def run_agent(
     max_turns: int = 6,
     verbose: bool = True,
 ) -> BaseModel | str:
-    """帶重試的 Agent 循環（詳細注釋見 week2_day5/agent.py）"""
+    """帶重試的 Agent 循環(詳細注釋見 week2_day5/agent.py)"""
     messages = [{"role": "user", "content": user_msg}]
     system = SYSTEM_PROMPT_WITH_JSON_CONSTRAINT if output_schema else None
 
     for turn in range(max_turns):
         if verbose:
-            print(f"\n[Agent W3D1 第 {turn + 1} 輪] 調用模型（帶重試）...")
+            print(f"\n[Agent W3D1 第 {turn + 1} 輪] 調用模型(帶重試)...")
 
-        # === 第三週第一天：使用帶重試的 API 調用 ===
+        # === 第三週第一天:使用帶重試的 API 調用 ===
         resp = _call_model(messages, TOOLS, system)
 
         if verbose:
@@ -86,11 +86,11 @@ def run_agent(
 
 if __name__ == "__main__":
     print("=" * 55)
-    print("Week 3 Day 1：帶重試的 Agent")
+    print("Week 3 Day 1:帶重試的 Agent")
     print("=" * 55)
-    result = run_agent("5kg 的包裹寄到 B 區要多少錢？", output_schema=ShippingQuote)
+    result = run_agent("5kg 的包裹寄到 B 區要多少錢?", output_schema=ShippingQuote)
     if isinstance(result, ShippingQuote):
-        print(f"\n✅ 結果：{result.fee_hkd} HKD，{result.summary}")
+        print(f"\n✅ 結果:{result.fee_hkd} HKD,{result.summary}")
     else:
-        print(f"\n結果：{result}")
-    print("\nDay 1 完成：重試邏輯已接入 agent loop。")
+        print(f"\n結果:{result}")
+    print("\nDay 1 完成:重試邏輯已接入 agent loop.")
