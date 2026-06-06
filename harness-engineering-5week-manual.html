@@ -1,0 +1,660 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Harness Engineering 五週實戰手冊</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;600;700;900&family=Noto+Sans+TC:wght@300;400;500;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #ffffff;
+    --bg-soft: #f7f4ec;
+    --bg-card: #fbf9f3;
+    --bg-deep: #f3efe4;
+    --ink: #1d1b16;
+    --ink-soft: #56544c;
+    --ink-faint: #8d8b80;
+    --accent: #a8721a;
+    --accent-bright: #c8923a;
+    --accent-dim: #cdb079;
+    --rein: #b8492a;
+    --green: #2f7048;
+    --line: #e7e2d5;
+    --line-soft: #f0ebdf;
+    --serif: 'Noto Serif TC', serif;
+    --sans: 'Noto Sans TC', sans-serif;
+    --mono: 'Space Mono', monospace;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--sans);
+    font-weight: 300;
+    line-height: 1.8;
+    font-size: 16.5px;
+    -webkit-font-smoothing: antialiased;
+    background-image:
+      linear-gradient(var(--line-soft) 1px, transparent 1px),
+      linear-gradient(90deg, var(--line-soft) 1px, transparent 1px),
+      radial-gradient(circle at 12% 6%, rgba(168,114,26,0.045), transparent 40%),
+      radial-gradient(circle at 88% 96%, rgba(184,73,42,0.04), transparent 44%);
+    background-size: 46px 46px, 46px 46px, 100% 100%, 100% 100%;
+    background-attachment: fixed;
+  }
+  .wrap { max-width: 860px; margin: 0 auto; padding: 0 26px; }
+
+  .progress-rail { position: sticky; top: 0; z-index: 50; background: rgba(255,255,255,0.88); backdrop-filter: blur(10px); border-bottom: 1px solid var(--line); }
+  .progress-inner { max-width: 860px; margin: 0 auto; padding: 12px 26px; display: flex; align-items: center; gap: 16px; }
+  .progress-label { font-family: var(--mono); font-size: 11px; letter-spacing: 0.14em; color: var(--ink-faint); text-transform: uppercase; white-space: nowrap; }
+  .bar { flex: 1; height: 6px; background: var(--bg-deep); border-radius: 4px; overflow: hidden; border: 1px solid var(--line); }
+  .bar > i { display: block; height: 100%; width: 0%; background: linear-gradient(90deg, var(--accent-bright), var(--accent)); transition: width 0.5s cubic-bezier(.2,.8,.2,1); }
+  .progress-pct { font-family: var(--mono); font-size: 13px; font-weight: 700; color: var(--accent); min-width: 42px; text-align: right; }
+
+  header { padding: 80px 0 56px; border-bottom: 1px solid var(--line); position: relative; overflow: hidden; }
+  .kicker { font-family: var(--mono); font-size: 11.5px; letter-spacing: 0.3em; text-transform: uppercase; color: var(--accent); margin-bottom: 24px; opacity: 0; animation: rise .8s .1s forwards; }
+  h1 { font-family: var(--serif); font-weight: 900; font-size: clamp(38px, 6.6vw, 62px); line-height: 1.08; letter-spacing: -0.01em; margin-bottom: 22px; opacity: 0; animation: rise .8s .25s forwards; }
+  h1 .em { color: var(--accent); font-style: italic; }
+  .lede { font-family: var(--serif); font-size: clamp(17px, 2.3vw, 21px); color: var(--ink-soft); max-width: 660px; line-height: 1.7; opacity: 0; animation: rise .8s .4s forwards; }
+  @keyframes rise { from { opacity: 0; transform: translateY(18px);} to { opacity: 1; transform: translateY(0);} }
+
+  .howto { margin: 44px 0 0; background: var(--bg-card); border: 1px solid var(--line); border-radius: 14px; padding: 30px 32px; opacity: 0; animation: rise .8s .55s forwards; }
+  .howto .label { font-family: var(--mono); font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--accent); margin-bottom: 18px; }
+  .howto-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px; background: var(--line); border-radius: 10px; overflow: hidden; margin-bottom: 22px; }
+  .howto-grid div { background: var(--bg); padding: 18px 20px; }
+  .howto-grid .t { font-family: var(--mono); font-size: 10.5px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink-faint); margin-bottom: 7px; }
+  .howto-grid .v { font-size: 15px; color: var(--ink); }
+  .howto p { color: var(--ink-soft); font-size: 15px; margin-top: 4px; }
+  .howto p strong { color: var(--ink); font-weight: 500; }
+
+  .week { padding: 60px 0 8px; border-bottom: 1px solid var(--line); }
+  .week-head { display: flex; align-items: baseline; gap: 18px; margin-bottom: 8px; }
+  .week-tag { font-family: var(--mono); font-size: 13px; color: var(--accent); letter-spacing: 0.18em; }
+  .week-head h2 { font-family: var(--serif); font-weight: 700; font-size: clamp(27px, 4.4vw, 38px); line-height: 1.15; letter-spacing: -0.01em; }
+  .week-goal { background: rgba(168,114,26,0.07); border-left: 3px solid var(--accent); border-radius: 0; padding: 16px 22px; margin: 18px 0 30px; }
+  .week-goal .t { font-family: var(--mono); font-size: 10.5px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--accent); margin-bottom: 6px; }
+  .week-goal p { color: var(--ink); font-size: 15.5px; margin: 0; }
+
+  .day { background: var(--bg-card); border: 1px solid var(--line); border-radius: 14px; padding: 26px 28px; margin-bottom: 16px; transition: border-color .3s, box-shadow .3s; }
+  .day:hover { border-color: var(--accent-dim); box-shadow: 0 6px 24px rgba(29,27,22,0.05); }
+  .day-top { display: flex; align-items: center; gap: 14px; margin-bottom: 6px; flex-wrap: wrap; }
+  .day-no { font-family: var(--mono); font-weight: 700; font-size: 13px; color: #3c2a06; background: var(--accent-bright); padding: 3px 11px; border-radius: 6px; letter-spacing: 0.05em; }
+  .day h3 { font-size: 19px; font-weight: 700; color: var(--ink); }
+  .day-time { font-family: var(--mono); font-size: 11px; color: var(--ink-faint); border: 1px solid var(--line); border-radius: 20px; padding: 2px 11px; margin-left: auto; }
+  .day-desc { color: var(--ink-soft); font-size: 15px; margin: 10px 0 16px; }
+
+  .tasks { list-style: none; }
+  .tasks li { display: flex; gap: 12px; align-items: flex-start; padding: 9px 0; border-bottom: 1px dashed var(--line); }
+  .tasks li:last-child { border-bottom: none; }
+  .tasks input[type="checkbox"] { appearance: none; -webkit-appearance: none; width: 19px; height: 19px; flex-shrink: 0; margin-top: 3px; border: 1.5px solid var(--accent-dim); border-radius: 5px; background: var(--bg); cursor: pointer; position: relative; transition: all .2s; }
+  .tasks input[type="checkbox"]:checked { background: var(--accent); border-color: var(--accent); }
+  .tasks input[type="checkbox"]:checked::after { content: "✓"; position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 13px; font-weight: 700; }
+  .tasks label { font-size: 15px; color: var(--ink-soft); cursor: pointer; line-height: 1.65; transition: color .2s, opacity .2s; }
+  .tasks input[type="checkbox"]:checked + label { color: var(--ink-faint); text-decoration: line-through; opacity: 0.65; }
+  .tasks label code { font-family: var(--mono); font-size: 0.85em; background: var(--bg-deep); padding: 1px 6px; border-radius: 4px; color: var(--accent); border: 1px solid var(--line); }
+  .tasks label strong { color: var(--ink); font-weight: 500; }
+
+  pre { background: var(--bg-deep); border: 1px solid var(--line); border-radius: 10px; padding: 18px 20px; overflow-x: auto; margin: 16px 0 4px; line-height: 1.6; }
+  pre code { font-family: var(--mono); font-size: 12.8px; color: #2a2823; }
+  .cmt { color: #908d82; font-style: italic; }
+  .kw { color: #b8492a; }
+  .st { color: #936512; }
+  .fn { color: #1d7a5e; }
+  .code-label { font-family: var(--mono); font-size: 10px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--ink-faint); margin: 14px 0 -8px; display: block; }
+
+  .checkpoint { margin: 18px 0 4px; background: #f1f7f2; border: 1px solid var(--green); border-radius: 12px; padding: 20px 24px; }
+  .checkpoint .t { font-family: var(--mono); font-size: 10.5px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--green); margin-bottom: 10px; display: flex; align-items: center; gap: 8px; }
+  .checkpoint p { color: var(--ink); font-size: 15px; margin: 0; }
+  .checkpoint .deliverable { margin-top: 12px; padding-top: 12px; border-top: 1px dashed var(--line); font-size: 14px; color: var(--ink-soft); }
+  .checkpoint .deliverable strong { color: var(--accent); font-weight: 500; }
+
+  .note { background: rgba(184,73,42,0.06); border-left: 3px solid var(--rein); border-radius: 0; padding: 14px 20px; margin: 16px 0; font-size: 14px; color: var(--ink-soft); }
+  .note strong { color: var(--rein); font-weight: 500; }
+
+  .final { padding: 60px 0; border-bottom: 1px solid var(--line); }
+  .final h2 { font-family: var(--serif); font-weight: 700; font-size: clamp(26px, 4.2vw, 36px); margin-bottom: 22px; }
+  .final p { color: var(--ink-soft); margin-bottom: 18px; }
+  .final p strong { color: var(--ink); font-weight: 500; }
+  .pill-row { display: flex; gap: 8px; flex-wrap: wrap; margin: 20px 0; }
+  .pill { font-family: var(--mono); font-size: 11px; letter-spacing: 0.06em; background: var(--bg-card); border: 1px solid var(--line); color: var(--ink-soft); padding: 6px 13px; border-radius: 7px; }
+
+  footer { padding: 50px 0 76px; text-align: center; }
+  footer p { font-size: 13.5px; color: var(--ink-faint); margin-bottom: 7px; }
+  footer a { color: var(--accent); text-decoration: none; border-bottom: 1px dotted var(--accent-dim); }
+  footer .mono { font-family: var(--mono); letter-spacing: 0.1em; }
+
+  @media (max-width: 600px) {
+    body { font-size: 15.5px; background-size: 32px 32px, 32px 32px, 100% 100%, 100% 100%; }
+    .howto-grid { grid-template-columns: 1fr; }
+    .day-time { margin-left: 0; }
+  }
+</style>
+</head>
+<body>
+
+<div class="progress-rail">
+  <div class="progress-inner">
+    <span class="progress-label">完成進度</span>
+    <div class="bar"><i id="barFill"></i></div>
+    <span class="progress-pct" id="barPct">0%</span>
+  </div>
+</div>
+
+<header>
+  <div class="wrap">
+    <div class="kicker">Harness Engineering · 後端工程師的 35 天實戰</div>
+    <h1>五週<span class="em">實戰</span>手冊<br>邊做,邊勾。</h1>
+    <p class="lede">這不是課程,是一張行動清單。每天一兩個小時,五週後你會擁有一個能講清楚「它怎麼失敗、我怎麼修」、而且<strong>手寫版和框架版兩種都做過</strong>的真實智能體(agent)——這才是面試和接單時最有說服力的東西。</p>
+
+    <div class="howto">
+      <div class="label">使用前須知</div>
+      <div class="howto-grid">
+        <div><div class="t">每日節奏</div><div class="v">約 1–2 小時 / 晚</div></div>
+        <div><div class="t">前置條件</div><div class="v">Python · DeepSeek API key</div></div>
+        <div><div class="t">最終產物</div><div class="v">手寫 + 框架兩版物流 agent</div></div>
+      </div>
+      <p><strong>怎麼使用這份手冊:</strong>每天打開對應的卡片,把任務逐條勾掉,頂部的進度條(progress bar)會實時更新。代碼(code)塊都是<strong>骨架和示意</strong>,目的是讓你看懂結構、快速上手,不是複製粘貼就能跑——留白處(比如 <code>validate_output</code>)需要你自己實現,而這正是學習真正發生的地方。</p>
+      <p style="margin-top:10px;"><strong>關於節奏的大實話:</strong>第一到第四週用裸 SDK 從零打造一個物流 agent,是整套訓練的核心;以你十五年後端的底子,第三週的可靠性(reliability)工程大概兩三天就能壓縮完,真正值得放慢的是第四週的<strong>評估(evaluation)</strong>。<strong>第五週是延伸模塊</strong>——把前四週手寫的東西用業界標準框架(LangChain / LangGraph / LangSmith)重做一遍,得到一個「兩種都做過」的對照組。五週是建議框架,不是死線。</p>
+    </div>
+  </div>
+</header>
+
+<!-- WEEK 1 -->
+<section class="week">
+  <div class="wrap">
+    <div class="week-head"><span class="week-tag">WEEK 01</span><h2>建立心智模型</h2></div>
+    <div class="week-goal"><div class="t">本週目標</div><p>不用寫太多代碼。目標是讀懂這門學科到底在講什麼,並用你已有的後端經驗,在腦子裡把 harness 的六大組件「對號入座」——分清哪些你早就會、哪些是真正的新東西。</p></div>
+
+    <div class="day">
+      <div class="day-top"><span class="day-no">DAY 1</span><h3>讀懂核心框架</h3><span class="day-time">~90 min</span></div>
+      <p class="day-desc">先建立 Agent = Model + Harness 的基本詞匯,以及導引(guides)與感測器(sensors)的二分法。這是後面所有實現的概念地基。</p>
+      <ul class="tasks">
+        <li><input type="checkbox" id="w1d1t1"><label for="w1d1t1">閱讀 Birgitta Böckeler 發表在 Martin Fowler 網站上的 <strong>《Harness engineering for coding agent users》</strong>(<code>martinfowler.com/articles/harness-engineering.html</code>)。</label></li>
+        <li><input type="checkbox" id="w1d1t2"><label for="w1d1t2">用一句話寫下 <strong>Agent = Model + Harness</strong> 的定義,以及 harness 指的是「模型以外的一切」。</label></li>
+        <li><input type="checkbox" id="w1d1t3"><label for="w1d1t3">記下兩類控制的區別:<strong>前饋式的 guides</strong>(事前導引)和 <strong>反饋式的 sensors</strong>(事後感測)。</label></li>
+        <li><input type="checkbox" id="w1d1t4"><label for="w1d1t4">尤其要記住 sensors 還能再分兩種:<strong>計算式(computational)</strong>(linter、測試,確定性、便宜)和 <strong>推理式(inferential)</strong>(LLM-as-judge,語義判斷、貴且帶概率性)。</label></li>
+      </ul>
+    </div>
+
+    <div class="day">
+      <div class="day-top"><span class="day-no">DAY 2</span><h3>讀懂「人在 loop 之上工作」</h3><span class="day-time">~60 min</span></div>
+      <p class="day-desc">補上概念鋪墊,理解為什麼 harness engineering 是一種「持續迭代的工程實踐」,而不是一次性的配置。</p>
+      <ul class="tasks">
+        <li><input type="checkbox" id="w1d2t1"><label for="w1d2t1">閱讀同一作者的前置篇《Humans and Agents in Software Engineering Loops》(<code>martinfowler.com/articles/exploring-gen-ai/humans-and-agents.html</code>)。</label></li>
+        <li><input type="checkbox" id="w1d2t2"><label for="w1d2t2">寫下三個調控維度:<strong>可維護性(maintainability)</strong>(最成熟)、<strong>架構契合(architecture)</strong>、<strong>功能行為(functional behaviour)</strong>(最難、目前仍未解決)。</label></li>
+        <li><input type="checkbox" id="w1d2t3"><label for="w1d2t3">記下一個關鍵洞察:harness 試圖把人的隱性知識「外化」成工具,但<strong>無法完全取代人的判斷</strong>——這恰恰是資深工程師的價值所在。</label></li>
+      </ul>
+    </div>
+
+    <div class="day">
+      <div class="day-top"><span class="day-no">DAY 3–4</span><h3>親手感受 harness 的運作</h3><span class="day-time">~2 hr</span></div>
+      <p class="day-desc">用 Claude Code 跑一次真實任務,親眼看它讀文件、跑測試、看到報錯後自我修正——這就是一個成熟的 harness 在你面前運轉。<strong>注意:</strong>這一步只是借一個成熟工具來「觀察 harness 長什麼樣」,跟後面幾週你要動手寫的實驗無關;它默認用 Anthropic 模型,但也支持把 DeepSeek 設為後端模型(見 DeepSeek 官方的 Agent 接入指南),想全程只用 DeepSeek 的話可以這樣配。</p>
+      <span class="code-label">安裝(需要 Node.js)</span>
+      <pre><code>npm install -g @anthropic-ai/claude-code
+<span class="cmt"># 進入一個真實的倉庫（repo），比如你碩士的某個項目</span>
+cd ~/your-project
+claude</code></pre>
+      <ul class="tasks">
+        <li><input type="checkbox" id="w1d3t1"><label for="w1d3t1">安裝 Claude Code,在一個你熟悉的現有項目裡啟動它。</label></li>
+        <li><input type="checkbox" id="w1d3t2"><label for="w1d3t2">給它一個真實的小任務(比如「幫這個模塊補測試」或「修這個 bug」),<strong>先觀察、別急著接受</strong>:它怎麼讀文件、跑測試、看到失敗後怎麼改。</label></li>
+        <li><input type="checkbox" id="w1d3t3"><label for="w1d3t3">記錄你觀察到的「harness 行為」:它用了哪些工具?測試失敗時的反饋循環(feedback loop)是怎麼運轉的?哪裡需要你介入?</label></li>
+        <li><input type="checkbox" id="w1d3t4"><label for="w1d3t4">看一眼 <code>CLAUDE.md</code> / <code>AGENTS.md</code> 這類配置文件的作用——這就是「前饋式 guide」的具體形態。</label></li>
+      </ul>
+    </div>
+
+    <div class="day">
+      <div class="day-top"><span class="day-no">DAY 5</span><h3>做一次自我盤點(gap analysis)</h3><span class="day-time">~60 min</span></div>
+      <p class="day-desc">把六大組件對照你做過的後端系統,老老實實標出「已會 / 半懂 / 全新」。這份盤點會直接變成你後面幾週的個性化重點。</p>
+      <ul class="tasks">
+        <li><input type="checkbox" id="w1d5t1"><label for="w1d5t1">建一張表,列出六大組件:<strong>工具/動作、護欄(guardrail)、反饋循環、可觀測性(observability)、評估、成本/降級(fallback)</strong>。</label></li>
+        <li><input type="checkbox" id="w1d5t2"><label for="w1d5t2">逐項標記掌握程度。預期結果:可觀測性、重試(retry)、降級、護欄你大概率是「已會」,只是換個對象;<strong>評估和推理式 sensors 才是「全新」</strong>。</label></li>
+        <li><input type="checkbox" id="w1d5t3"><label for="w1d5t3">把標為「全新」的項圈出來——那就是第四週要重點攻克的。</label></li>
+      </ul>
+      <div class="checkpoint">
+        <div class="t">✓ 本週完成標準</div>
+        <p>你能不看筆記、用自己的話跟別人解釋:什麼是 harness、guides 和 sensors 的區別、計算式和推理式 sensors 的差異,並說出你個人最需要補的兩塊是「評估」相關。</p>
+        <div class="deliverable"><strong>產物:</strong>一頁筆記 + 一張六組件自我盤點表。</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- WEEK 2 -->
+<section class="week">
+  <div class="wrap">
+    <div class="week-head"><span class="week-tag">WEEK 02</span><h2>第一個工具調用 Agent</h2></div>
+    <div class="week-goal"><div class="t">本週目標</div><p>從零做一個能調用 2–3 個函數的物流 agent,並讓它跨過「演示(demo)」的門檻——加上第一道護欄,強制輸出結構化、可校驗的結果。用你的物流領域背景當題材。</p></div>
+
+    <div class="day">
+      <div class="day-top"><span class="day-no">DAY 1</span><h3>搭項目骨架 + 定義工具</h3><span class="day-time">~90 min</span></div>
+      <p class="day-desc">先把三個 mock 工具寫出來(查物流狀態、算運費、查庫存)。現在不接真實系統,用假數據,專注在 agent 邏輯本身。</p>
+      <span class="code-label">setup — 仍用 anthropic SDK，但指向 DeepSeek 的 anthropic 兼容入口</span>
+      <pre><code><span class="kw">python</span> -m venv .venv && <span class="kw">source</span> .venv/bin/activate
+pip install anthropic pydantic
+<span class="cmt"># DeepSeek 的 anthropic 兼容入口：代碼結構不變，只換 key 和 base_url</span>
+<span class="kw">export</span> ANTHROPIC_API_KEY=<span class="st">"sk-..."</span>          <span class="cmt"># 這裡填 DeepSeek 的 key</span>
+<span class="kw">export</span> ANTHROPIC_BASE_URL=<span class="st">"https://api.deepseek.com/anthropic"</span></code></pre>
+      <span class="code-label">tools.py — 三個 mock 工具</span>
+      <pre><code><span class="kw">def</span> <span class="fn">track_shipment</span>(tracking_no: str) -> dict:
+    <span class="cmt"># 真實版本會調物流 API；先返回假數據</span>
+    <span class="kw">return</span> {<span class="st">"status"</span>: <span class="st">"in_transit"</span>, <span class="st">"eta_days"</span>: <span class="st">2</span>}
+
+<span class="kw">def</span> <span class="fn">calc_shipping_fee</span>(weight_kg: float, zone: str) -> dict:
+    <span class="kw">return</span> {<span class="st">"fee_hkd"</span>: round(weight_kg * <span class="st">18</span> + <span class="st">30</span>, <span class="st">2</span>)}
+
+<span class="kw">def</span> <span class="fn">check_inventory</span>(sku: str) -> dict:
+    <span class="kw">return</span> {<span class="st">"sku"</span>: sku, <span class="st">"in_stock"</span>: <span class="st">120</span>}</code></pre>
+      <ul class="tasks">
+        <li><input type="checkbox" id="w2d1t1"><label for="w2d1t1">建虛擬環境,安裝 <code>anthropic</code> 和 <code>pydantic</code>,把 <code>ANTHROPIC_API_KEY</code> 配成你的 DeepSeek key,並把 <code>ANTHROPIC_BASE_URL</code> 指向 DeepSeek 的 anthropic 入口。</label></li>
+        <li><input type="checkbox" id="w2d1t2"><label for="w2d1t2">寫出三個返回假數據的 mock 工具函數。</label></li>
+        <li><input type="checkbox" id="w2d1t3"><label for="w2d1t3">給每個工具寫好 <strong>JSON schema 描述</strong>(name、description、input_schema)——這是 agent「看得懂」工具的方式。</label></li>
+      </ul>
+    </div>
+
+    <div class="day">
+      <div class="day-top"><span class="day-no">DAY 2</span><h3>接上 tool use,讓 agent 開口調用工具</h3><span class="day-time">~90 min</span></div>
+      <p class="day-desc">第一次讓模型自己決定該調用哪個工具。這一步跑通,你就有了一個最原始的 agent。</p>
+      <span class="code-label">第一次調用</span>
+      <pre><code><span class="kw">import</span> anthropic
+<span class="cmt"># 自動讀取 ANTHROPIC_API_KEY 與 ANTHROPIC_BASE_URL（已指向 DeepSeek）</span>
+client = anthropic.Anthropic()
+
+resp = client.messages.create(
+    model=<span class="st">"deepseek-v4-flash"</span>,   <span class="cmt"># 或 deepseek-v4-pro</span>
+    max_tokens=<span class="st">1024</span>,
+    tools=TOOLS,              <span class="cmt"># 上面定義的 schema 列表</span>
+    messages=[{<span class="st">"role"</span>: <span class="st">"user"</span>,
+               <span class="st">"content"</span>: <span class="st">"幫我查 SF123 的物流狀態"</span>}],
+)
+<span class="kw">print</span>(resp.stop_reason)   <span class="cmt"># 期望看到 'tool_use'</span></code></pre>
+      <ul class="tasks">
+        <li><input type="checkbox" id="w2d2t1"><label for="w2d2t1">發出第一個帶 <code>tools</code> 的請求,確認 <code>stop_reason</code> 返回 <code>tool_use</code>。</label></li>
+        <li><input type="checkbox" id="w2d2t2"><label for="w2d2t2">從響應裡解析出模型想調用哪個工具、帶了哪些參數。</label></li>
+        <li><input type="checkbox" id="w2d2t3"><label for="w2d2t3">手動執行對應的工具函數,看看結果對不對。</label></li>
+      </ul>
+    </div>
+
+    <div class="day">
+      <div class="day-top"><span class="day-no">DAY 3</span><h3>把它變成完整的循環</h3><span class="day-time">~2 hr</span></div>
+      <p class="day-desc">真正的 agent 是一個循環(loop):模型調工具 → 你執行 → 把結果喂回去 → 模型繼續,直到它給出最終答案。這是本週的技術核心。</p>
+      <span class="code-label">agent loop 骨架</span>
+      <pre><code><span class="kw">def</span> <span class="fn">run_agent</span>(user_msg, max_turns=<span class="st">6</span>):
+    messages = [{<span class="st">"role"</span>: <span class="st">"user"</span>, <span class="st">"content"</span>: user_msg}]
+    <span class="kw">for</span> _ <span class="kw">in</span> range(max_turns):
+        resp = client.messages.create(model=MODEL,
+                 max_tokens=<span class="st">1024</span>, tools=TOOLS, messages=messages)
+        messages.append({<span class="st">"role"</span>: <span class="st">"assistant"</span>, <span class="st">"content"</span>: resp.content})
+        <span class="kw">if</span> resp.stop_reason != <span class="st">"tool_use"</span>:
+            <span class="kw">return</span> resp        <span class="cmt"># 完成，返回最終答案</span>
+        <span class="cmt"># 執行每個被請求的工具，把結果作為 tool_result 返回</span>
+        results = <span class="fn">dispatch_tools</span>(resp.content)
+        messages.append({<span class="st">"role"</span>: <span class="st">"user"</span>, <span class="st">"content"</span>: results})</code></pre>
+      <ul class="tasks">
+        <li><input type="checkbox" id="w2d3t1"><label for="w2d3t1">實現 <code>dispatch_tools()</code>:遍歷模型請求的工具、執行、拼成 <code>tool_result</code> 塊。</label></li>
+        <li><input type="checkbox" id="w2d3t2"><label for="w2d3t2">把工具結果喂回 <code>messages</code>,讓循環繼續。</label></li>
+        <li><input type="checkbox" id="w2d3t3"><label for="w2d3t3">測一個<strong>需要多步</strong>的問題(比如「這批貨 5kg 寄到 B 區要多少錢,順便看下 SKU-9 還有沒有貨」),確認它會連續調用兩個工具。</label></li>
+        <li><input type="checkbox" id="w2d3t4"><label for="w2d3t4">加上 <code>max_turns</code> 上限,避免死循環——這已經算是一種最基本的護欄了。</label></li>
+      </ul>
+    </div>
+
+    <div class="day">
+      <div class="day-top"><span class="day-no">DAY 4</span><h3>故意把它搞壞</h3><span class="day-time">~60 min</span></div>
+      <p class="day-desc">在加防護之前,先親眼看它怎麼壞。這一步是為了建立你對「失敗模式(failure mode)」的直覺——而這正是後面評估的基礎。</p>
+      <ul class="tasks">
+        <li><input type="checkbox" id="w2d4t1"><label for="w2d4t1">傳壞參數(空字符串、負的重量、不存在的 SKU),看 agent 和工具怎麼反應。</label></li>
+        <li><input type="checkbox" id="w2d4t2"><label for="w2d4t2">讓某個工具<strong>主動拋異常</strong>,觀察整個循環是不是直接崩了。</label></li>
+        <li><input type="checkbox" id="w2d4t3"><label for="w2d4t3">問一個<strong>工具答不了</strong>的問題,看模型是老實說不知道,還是「幻覺(hallucination)」出一個答案。</label></li>
+        <li><input type="checkbox" id="w2d4t4"><label for="w2d4t4">把觀察到的失敗模式記下來(這份清單第四、五週都會用到)。</label></li>
+      </ul>
+    </div>
+
+    <div class="day">
+      <div class="day-top"><span class="day-no">DAY 5</span><h3>第一道護欄:結構化輸出校驗</h3><span class="day-time">~90 min</span></div>
+      <p class="day-desc">用 Pydantic 強制 agent 的最終輸出符合 schema。校驗失敗就當成報錯(下週會接上重試)。跨過這一步,你的東西就從 demo 變成「半個產品」了。</p>
+      <span class="code-label">guardrail.py</span>
+      <pre><code><span class="kw">from</span> pydantic <span class="kw">import</span> BaseModel, field_validator
+
+<span class="kw">class</span> <span class="fn">ShippingQuote</span>(BaseModel):
+    fee_hkd: float
+    eta_days: int
+    @field_validator(<span class="st">"fee_hkd"</span>)
+    <span class="kw">def</span> <span class="fn">positive</span>(cls, v):
+        <span class="kw">assert</span> v > <span class="st">0</span>, <span class="st">"fee must be positive"</span>
+        <span class="kw">return</span> v
+
+<span class="kw">def</span> <span class="fn">validate_output</span>(raw: str) -> ShippingQuote:
+    <span class="kw">return</span> ShippingQuote.model_validate_json(raw)  <span class="cmt"># 失敗就拋異常</span></code></pre>
+      <ul class="tasks">
+        <li><input type="checkbox" id="w2d5t1"><label for="w2d5t1">用 Pydantic 定義你期望的輸出結構,加上至少一條業務校驗規則。</label></li>
+        <li><input type="checkbox" id="w2d5t2"><label for="w2d5t2">在提示詞(prompt)裡<strong>明確要求模型只輸出 JSON</strong>(不要開場白、不要 Markdown 圍欄)。</label></li>
+        <li><input type="checkbox" id="w2d5t3"><label for="w2d5t3">把 <code>validate_output()</code> 接到 agent 的最終響應上,把「校驗成功」和「校驗失敗拋異常」兩條路都跑通。</label></li>
+      </ul>
+      <div class="checkpoint">
+        <div class="t">✓ 本週完成標準</div>
+        <p>你有了一個能多步調用工具、並對最終輸出做結構化校驗的物流 agent。同時你還攢下了一份親手製造的「失敗模式清單」。</p>
+        <div class="deliverable"><strong>產物:</strong>一個能跑的 tool-use agent(<code>tools.py</code> + agent loop + <code>guardrail.py</code>)+ 失敗模式筆記。</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- WEEK 3 -->
+<section class="week">
+  <div class="wrap">
+    <div class="week-head"><span class="week-tag">WEEK 03</span><h2>加上可靠性</h2></div>
+    <div class="week-goal"><div class="t">本週目標</div><p>把上週的 agent 變得「可信」。這週的每一項——重試、熔斷、可觀測性、降級、成本控制——你在後端都做過,現在只是把對象換成一個不確定的 LLM 下游依賴(dependency)。這是你的主場,可以走快一點。</p></div>
+
+    <div class="day">
+      <div class="day-top"><span class="day-no">DAY 1</span><h3>重試 + 指數退避</h3><span class="day-time">~60 min</span></div>
+      <p class="day-desc">LLM API 會限流、會超時、輸出偶爾過不了校驗。把這些都當成可重試的瞬時故障來處理。</p>
+      <ul class="tasks">
+        <li><input type="checkbox" id="w3d1t1"><label for="w3d1t1">給 API 調用包一層重試,對 <code>RateLimitError</code> 和校驗失敗做 <strong>指數退避(exponential backoff)</strong>(<code>2 ** attempt</code> 秒)。</label></li>
+        <li><input type="checkbox" id="w3d1t2"><label for="w3d1t2">區分「可重試」(限流、暫時性)和「不可重試」(參數錯誤)的異常,後者別白白重試。</label></li>
+        <li><input type="checkbox" id="w3d1t3"><label for="w3d1t3">校驗失敗時,可以考慮把報錯信息<strong>反饋給模型</strong>讓它自己修正——這就是一個 sensor 循環。</label></li>
+      </ul>
+    </div>
+
+    <div class="day">
+      <div class="day-top"><span class="day-no">DAY 2</span><h3>超時 + 熔斷器</h3><span class="day-time">~60 min</span></div>
+      <p class="day-desc">避免單次調用卡死整個流程,並在連續失敗時快速失敗,而不是反復去捶一個已經掛了的服務。</p>
+      <ul class="tasks">
+        <li><input type="checkbox" id="w3d2t1"><label for="w3d2t1">給每次調用設一個合理的超時(timeout)。</label></li>
+        <li><input type="checkbox" id="w3d2t2"><label for="w3d2t2">實現一個簡單的 <strong>熔斷器(circuit breaker)</strong>:連續 N 次失敗後,一段時間內直接走降級路徑。</label></li>
+      </ul>
+    </div>
+
+    <div class="day">
+      <div class="day-top"><span class="day-no">DAY 3</span><h3>可觀測性:每次調用都留痕</h3><span class="day-time">~90 min</span></div>
+      <p class="day-desc">沒有這一層,你連 agent 為什麼出錯都查不到。記錄足夠的結構化信息,讓每次調用都可追溯、可分析。記住這份手寫的日誌(log)——第五週你會用 LangSmith 把它替換掉,親身對比兩者的差別。</p>
+      <span class="code-label">observability.py</span>
+      <pre><code><span class="kw">import</span> json, time, hashlib, logging
+
+<span class="kw">def</span> <span class="fn">log_call</span>(messages, resp, t0):
+    logging.info(json.dumps({
+        <span class="st">"input_hash"</span>: hashlib.sha256(
+            json.dumps(messages).encode()).hexdigest()[:<span class="st">12</span>],
+        <span class="st">"model"</span>: resp.model,
+        <span class="st">"latency_ms"</span>: int((time.time() - t0) * <span class="st">1000</span>),
+        <span class="st">"in_tokens"</span>: resp.usage.input_tokens,
+        <span class="st">"out_tokens"</span>: resp.usage.output_tokens,
+        <span class="st">"stop_reason"</span>: resp.stop_reason,
+    }))</code></pre>
+      <ul class="tasks">
+        <li><input type="checkbox" id="w3d3t1"><label for="w3d3t1">給每次 LLM 調用記錄:輸入 hash、模型版本、延遲(latency)、輸入/輸出 token 數、stop_reason。</label></li>
+        <li><input type="checkbox" id="w3d3t2"><label for="w3d3t2">把日誌寫成<strong>結構化 JSON</strong>(每行一條),方便之後 grep / 導入分析。</label></li>
+        <li><input type="checkbox" id="w3d3t3"><label for="w3d3t3">跑幾個請求後,翻一遍日誌,確認你能還原出「這次對話到底發生了什麼」。</label></li>
+      </ul>
+    </div>
+
+    <div class="day">
+      <div class="day-top"><span class="day-no">DAY 4</span><h3>優雅降級(graceful degradation)</h3><span class="day-time">~60 min</span></div>
+      <p class="day-desc">當主模型不可用、太慢或太貴時,系統應該優雅地降級,而不是整個崩掉。經典的 SRE 思路,換個場景用。</p>
+      <ul class="tasks">
+        <li><input type="checkbox" id="w3d4t1"><label for="w3d4t1">設計降級策略:主模型失敗 → 退到更小/更快的模型(比如從 <code>deepseek-v4-pro</code> 退到 <code>deepseek-v4-flash</code>);再失敗 → 返回緩存結果或「請稍後再試」的安全響應。</label></li>
+        <li><input type="checkbox" id="w3d4t2"><label for="w3d4t2">把上週那個「答不了的問題」接上降級路徑,確認系統不再崩、而是給出可控的響應。</label></li>
+      </ul>
+    </div>
+
+    <div class="day">
+      <div class="day-top"><span class="day-no">DAY 5</span><h3>成本追蹤</h3><span class="day-time">~60 min</span></div>
+      <p class="day-desc">把 token 換算成錢。成本控制是企業客戶和僱主最在意、卻最少有人主動聊的點——聊得出來就是加分項。</p>
+      <ul class="tasks">
+        <li><input type="checkbox" id="w3d5t1"><label for="w3d5t1">用 Day 3 的 token 日誌,加一個 <code>cost_usd</code>(或 <code>cost_cny</code>)字段(按模型定價換算;DeepSeek 官網有 flash/pro 兩檔的每百萬 token 報價)。</label></li>
+        <li><input type="checkbox" id="w3d5t2"><label for="w3d5t2">寫一個小腳本,把日誌匯總成「每次對話的平均成本、總成本、最貴的幾次」。</label></li>
+        <li><input type="checkbox" id="w3d5t3"><label for="w3d5t3">想一個省成本的點子(比如把簡單問題路由到小模型),記在筆記裡——這是面試很好的談資。</label></li>
+      </ul>
+      <div class="checkpoint">
+        <div class="t">✓ 本週完成標準</div>
+        <p>你的 agent 現在有了重試、熔斷、結構化可觀測性、降級和成本追蹤。它已經是一個「敢往生產環境放」的系統,而不只是個 demo 了。</p>
+        <div class="deliverable"><strong>產物:</strong>一個帶完整可靠性層的 agent + 一份成本匯總腳本。這就是 harness 那「80%」的核心。</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- WEEK 4 -->
+<section class="week">
+  <div class="wrap">
+    <div class="week-head"><span class="week-tag">WEEK 04</span><h2>學會評估</h2></div>
+    <div class="week-goal"><div class="t">本週目標</div><p>為一個「沒有標準答案」的系統設計測試。這是 harness engineering 裡最反直覺、也最值錢的技能,大多數人停在「會寫 prompt」就不往前走了。慢慢來,這週是你真正拉開差距的地方。</p></div>
+
+    <div class="day">
+      <div class="day-top"><span class="day-no">DAY 1</span><h3>建立評估數據集</h3><span class="day-time">~90 min</span></div>
+      <p class="day-desc">沒有數據集就沒有評估。用你前兩週的失敗模式清單當靈感,故意把容易出錯的邊界案例放進去。這份數據集(dataset)第五週還會再用一次。</p>
+      <ul class="tasks">
+        <li><input type="checkbox" id="w4d1t1"><label for="w4d1t1">寫 <strong>20–50 個測試案例</strong>,每個包含:輸入問題、預期的工具調用、可接受的輸出(或判斷標準)。</label></li>
+        <li><input type="checkbox" id="w4d1t2"><label for="w4d1t2">故意摻進<strong>邊界和陷阱案例</strong>(答不了的、模棱兩可的、需要拒答的)。</label></li>
+        <li><input type="checkbox" id="w4d1t3"><label for="w4d1t3">存成 JSONL 或 CSV,讓腳本能逐條讀取。</label></li>
+      </ul>
+    </div>
+
+    <div class="day">
+      <div class="day-top"><span class="day-no">DAY 2</span><h3>確定性指標:精確率 / 召回率</h3><span class="day-time">~90 min</span></div>
+      <p class="day-desc">先用便宜、確定性的方式評估能量化的部分(比如「有沒有調對工具」「輸出格式對不對」)——對應 Fowler 講的計算式 sensor。</p>
+      <ul class="tasks">
+        <li><input type="checkbox" id="w4d2t1"><label for="w4d2t1">寫腳本把整個數據集跑一遍,記錄每個案例的實際輸出。</label></li>
+        <li><input type="checkbox" id="w4d2t2"><label for="w4d2t2">對「工具選擇是否正確」「輸出 schema 是否通過」這類可判定的項,計算 <strong>精確率(precision)/ 召回率(recall)</strong>。</label></li>
+        <li><input type="checkbox" id="w4d2t3"><label for="w4d2t3">把所有<strong>失敗案例</strong>列出來,人工看一眼為什麼錯——這比一個總分更有價值。</label></li>
+      </ul>
+    </div>
+
+    <div class="day">
+      <div class="day-top"><span class="day-no">DAY 3</span><h3>推理式 sensor:LLM-as-judge</h3><span class="day-time">~2 hr</span></div>
+      <p class="day-desc">對「沒有標準答案」的部分(回答質量、語氣、是否答非所問),用一個模型去給另一個模型的輸出打分。理解它的威力,也理解它的不確定性。</p>
+      <span class="code-label">judge.py — 打分骨架</span>
+      <pre><code>JUDGE_PROMPT = <span class="st">"""你是嚴格的評審。根據以下標準給回答打 1–5 分，
+只輸出 JSON：{"score": int, "reason": str}
+標準：準確性、是否老實承認不知道、是否答非所問。
+問題：{q}
+回答：{a}"""</span>
+
+<span class="kw">def</span> <span class="fn">judge</span>(q, a):
+    r = client.messages.create(model=MODEL, max_tokens=<span class="st">300</span>,
+        messages=[{<span class="st">"role"</span>:<span class="st">"user"</span>,
+                   <span class="st">"content"</span>: JUDGE_PROMPT.format(q=q, a=a)}])
+    <span class="kw">return</span> json.loads(r.content[<span class="st">0</span>].text)</code></pre>
+      <ul class="tasks">
+        <li><input type="checkbox" id="w4d3t1"><label for="w4d3t1">寫一個 judge,給 agent 的回答質量打分並給出理由。</label></li>
+        <li><input type="checkbox" id="w4d3t2"><label for="w4d3t2">同一批案例<strong>跑兩三次</strong>,觀察 judge 分數的波動——親身體會「推理式 sensor 是帶概率性的」。</label></li>
+        <li><input type="checkbox" id="w4d3t3"><label for="w4d3t3">挑幾個 judge 打分和你直覺不一致的案例,想想到底是 judge 不準,還是 prompt 不夠明確。</label></li>
+      </ul>
+      <div class="note"><strong>注意:</strong>LLM-as-judge 不是真理,它本身也會出錯。它的價值在於把「無法量化的質量」變成「大致可追蹤的數字」,讓你能比較不同版本的好壞,而不是給出絕對的裁決。</div>
+    </div>
+
+    <div class="day">
+      <div class="day-top"><span class="day-no">DAY 4</span><h3>串成自動化評估流水線</h3><span class="day-time">~90 min</span></div>
+      <p class="day-desc">把前三天的零件串成一條可重復執行的流水線(pipeline):讀數據集 → 跑 agent → 算確定性指標 + judge 打分 → 產出報告。改完 prompt 就重跑一次,用數字判斷有沒有變好。</p>
+      <ul class="tasks">
+        <li><input type="checkbox" id="w4d4t1"><label for="w4d4t1">寫一個 <code>run_eval.py</code>,一鍵把整個數據集跑完並輸出匯總報告(總體分數 + 失敗清單)。</label></li>
+        <li><input type="checkbox" id="w4d4t2"><label for="w4d4t2">做一次<strong>真實的迭代</strong>:改一處 prompt 或護欄,重跑評估,用數字證明它變好了(或變壞了)。</label></li>
+        <li><input type="checkbox" id="w4d4t3"><label for="w4d4t3">把報告輸出成易讀的格式(Markdown 或簡單的 HTML 表),這會是作品集的一部分。</label></li>
+      </ul>
+    </div>
+
+    <div class="day">
+      <div class="day-top"><span class="day-no">DAY 5</span><h3>寫成案例,讓人看見</h3><span class="day-time">~90 min</span></div>
+      <p class="day-desc">最後一步,也是回報最高的一步。把整個項目寫成一份 README / 案例,重點不是炫耀它多能幹,而是<strong>老實描述它會怎麼失敗、你又是怎麼處理的</strong>。這份文檔本身就是你求職和接單的武器。</p>
+      <ul class="tasks">
+        <li><input type="checkbox" id="w4d5t1"><label for="w4d5t1">寫 README:問題背景(物流場景)、架構圖、harness 各層(護欄/可觀測性/降級/評估)的設計取捨。</label></li>
+        <li><input type="checkbox" id="w4d5t2"><label for="w4d5t2">專門寫一節 <strong>「失敗模式與對策」</strong>:列出你發現的失敗、各自怎麼檢測和處理。這是面試最常被深挖、也最能體現資深度的地方。</label></li>
+        <li><input type="checkbox" id="w4d5t3"><label for="w4d5t3">放上評估報告和成本數字,用數據說話。</label></li>
+        <li><input type="checkbox" id="w4d5t4"><label for="w4d5t4">推到 GitHub,開源這個倉庫——有公開的 LLM 項目,在多份薪資報告裡都對應到實打實的薪資溢價。</label></li>
+      </ul>
+      <div class="checkpoint">
+        <div class="t">✓ 本週完成標準</div>
+        <p>你有了一個帶完整評估流水線的手寫 agent,能用數字說明它的質量,還有一份老實描述失敗模式的案例文檔。你已經走在大多數「會寫 prompt 但不會評估」的人前面了。</p>
+        <div class="deliverable"><strong>產物:</strong>公開的 GitHub 倉庫 + 評估報告 + 案例 README。這是你的「手寫版」基準線(baseline)。</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- WEEK 5 -->
+<section class="week">
+  <div class="wrap">
+    <div class="week-head"><span class="week-tag">WEEK 05</span><h2>遷移到框架(對照組)</h2></div>
+    <div class="week-goal"><div class="t">本週目標(延伸模塊)</div><p>把前四週手寫的物流 agent,用業界標準框架重做一遍。目的不是學 API,而是<strong>親身對比</strong>:框架幫你省了什麼、又把什麼藏了起來。做完你會有一個極有說服力的作品——「同一個 agent,我手寫和框架兩種都做過,而且能說清楚什麼時候該選哪個」。</p></div>
+
+    <div class="note"><strong>版本提醒:</strong>LangChain 和 LangGraph 已於 2025 年 10 月發布 1.0,官方承諾在 2.0 之前不再有破壞性變更(breaking changes),所以現在學是個穩定的好時機。動手時記得<strong>鎖定版本</strong>(<code>pip install "langchain&gt;=1,&lt;2" "langgraph&gt;=1,&lt;2" langsmith langchain-openai</code>),並以官方最新文檔為準——框架的 API 還是比裸 SDK 更新得快。<strong>接 DeepSeek:</strong>DeepSeek 走 OpenAI 兼容格式,所以這裡用 <code>langchain-openai</code>,把 base_url 指向 <code>https://api.deepseek.com</code> 即可(下面代碼示範)。</div>
+
+    <div class="day">
+      <div class="day-top"><span class="day-no">DAY 1</span><h3>用 create_agent 重建第二週的 agent</h3><span class="day-time">~90 min</span></div>
+      <p class="day-desc">先感受一下框架「搭建層」的威力:第二週你手寫了整個 agent loop 和 tool dispatch,在這裡幾行就搞定。重點是數一數到底省了多少行。</p>
+      <span class="code-label">langchain 版 — 對比第二週那整個 loop</span>
+      <pre><code><span class="kw">from</span> langchain.agents <span class="kw">import</span> create_agent
+<span class="kw">from</span> langchain.tools <span class="kw">import</span> tool
+<span class="kw">from</span> langchain.chat_models <span class="kw">import</span> init_chat_model
+
+@tool
+<span class="kw">def</span> <span class="fn">track_shipment</span>(tracking_no: str) -> dict:
+    <span class="st">"""查詢物流狀態"""</span>
+    <span class="kw">return</span> {<span class="st">"status"</span>: <span class="st">"in_transit"</span>, <span class="st">"eta_days"</span>: <span class="st">2</span>}
+
+<span class="cmt"># DeepSeek 走 OpenAI 兼容格式：用 openai provider + base_url 指向 DeepSeek</span>
+model = <span class="fn">init_chat_model</span>(
+    <span class="st">"deepseek-v4-flash"</span>, model_provider=<span class="st">"openai"</span>,
+    base_url=<span class="st">"https://api.deepseek.com"</span>,
+    api_key=<span class="st">"sk-..."</span>,   <span class="cmt"># DeepSeek key（建議用環境變量）</span>
+)
+agent = <span class="fn">create_agent</span>(
+    model=model,
+    tools=[track_shipment, calc_shipping_fee, check_inventory],
+)
+agent.invoke({<span class="st">"messages"</span>: [{<span class="st">"role"</span>: <span class="st">"user"</span>,
+                            <span class="st">"content"</span>: <span class="st">"查 SF123 狀態"</span>}]})</code></pre>
+      <ul class="tasks">
+        <li><input type="checkbox" id="w5d1t1"><label for="w5d1t1">裝好 <code>langchain</code> / <code>langgraph</code> / <code>langsmith</code> / <code>langchain-openai</code> 並鎖定 1.x 版本。</label></li>
+        <li><input type="checkbox" id="w5d1t2"><label for="w5d1t2">給三個工具加上 <code>@tool</code> 裝飾器(decorator),用 <code>create_agent()</code> 重建第二週的 agent。</label></li>
+        <li><input type="checkbox" id="w5d1t3"><label for="w5d1t3"><strong>記錄行數對比</strong>:框架版 vs 你手寫的 loop + dispatch + schema,到底省了多少?</label></li>
+        <li><input type="checkbox" id="w5d1t4"><label for="w5d1t4">想一想:省下來的那些代碼,框架在背後幫你做了哪些事?(這正是你手寫過才答得上來的問題)</label></li>
+      </ul>
+    </div>
+
+    <div class="day">
+      <div class="day-top"><span class="day-no">DAY 2</span><h3>用 LangGraph 拿到「重啟後能接著跑」</h3><span class="day-time">~2 hr</span></div>
+      <p class="day-desc">把 agent 表達成一張狀態圖(state graph),並掛上檢查點(checkpointer)。這帶來一個你手寫版沒有的能力:流程跑到一半服務器重啟了,也能從斷點接著跑。這是框架真正值錢的地方之一。</p>
+      <span class="code-label">langgraph 版 — 狀態圖 + 持久化</span>
+      <pre><code><span class="kw">from</span> langgraph.graph <span class="kw">import</span> StateGraph, START, END
+<span class="kw">from</span> langgraph.checkpoint.memory <span class="kw">import</span> InMemorySaver
+
+builder = <span class="fn">StateGraph</span>(AgentState)
+builder.add_node(<span class="st">"model"</span>, call_model)
+builder.add_node(<span class="st">"tools"</span>, run_tools)
+builder.add_conditional_edges(<span class="st">"model"</span>, should_continue)  <span class="cmt"># 分支</span>
+builder.add_edge(<span class="st">"tools"</span>, <span class="st">"model"</span>)                    <span class="cmt"># 循環</span>
+
+graph = builder.<span class="fn">compile</span>(checkpointer=InMemorySaver())
+<span class="cmt"># 同一個 thread_id：重啟後可從斷點接著跑，也支持人工審查中斷</span>
+graph.invoke(inp, config={<span class="st">"configurable"</span>: {<span class="st">"thread_id"</span>: <span class="st">"order-42"</span>}})</code></pre>
+      <ul class="tasks">
+        <li><input type="checkbox" id="w5d2t1"><label for="w5d2t1">把 agent 重構成 <code>StateGraph</code>:model 節點、tools 節點、條件分支和循環邊(edge)。</label></li>
+        <li><input type="checkbox" id="w5d2t2"><label for="w5d2t2">掛上 checkpointer,用同一個 <code>thread_id</code> 跑兩次,確認狀態(state)被保存了下來。</label></li>
+        <li><input type="checkbox" id="w5d2t3"><label for="w5d2t3">試一次 <strong>人在環中(human-in-the-loop)中斷</strong>:在執行危險動作之前暫停、等人工批准了再接著跑。</label></li>
+        <li><input type="checkbox" id="w5d2t4"><label for="w5d2t4">對照第二週手寫的 <code>max_turns</code> 循環:LangGraph 的圖模型多給了你什麼?(持久化、分支、中斷)</label></li>
+      </ul>
+    </div>
+
+    <div class="day">
+      <div class="day-top"><span class="day-no">DAY 3</span><h3>用 LangSmith 換掉手寫的可觀測性</h3><span class="day-time">~60 min</span></div>
+      <p class="day-desc">第三週你手寫了結構化日誌。在這裡你會發現:只要設兩個環境變量(environment variable),LangSmith 就自動把每次調用的完整追蹤(trace)、token、成本、延遲都記下來並可視化。對比一下你手寫那段 vs 開箱即用。</p>
+      <span class="code-label">啟用追蹤 — 不用改任何 agent 代碼</span>
+      <pre><code><span class="kw">export</span> LANGSMITH_TRACING=<span class="st">true</span>
+<span class="kw">export</span> LANGSMITH_API_KEY=<span class="st">"ls-..."</span>
+<span class="cmt"># 跑 agent → 到 LangSmith 後台看完整的 trace 樹、token、成本、延遲</span></code></pre>
+      <ul class="tasks">
+        <li><input type="checkbox" id="w5d3t1"><label for="w5d3t1">設好環境變量,跑幾次 agent,到 LangSmith 後台看自動生成的 trace。</label></li>
+        <li><input type="checkbox" id="w5d3t2"><label for="w5d3t2">找到框架自動記錄的:每一步工具調用、token、成本、延遲。對照第三週你手寫 <code>log_call()</code> 抓的那些字段。</label></li>
+        <li><input type="checkbox" id="w5d3t3"><label for="w5d3t3"><strong>老實評估:</strong>哪些是框架做得比你手寫更好(可視化、trace 樹)?哪些是你手寫版更可控、更輕量(沒有外部依賴、數據不出境)?</label></li>
+      </ul>
+      <div class="note"><strong>隱私提醒:</strong>LangSmith 是雲服務,trace 會發到第三方。如果處理的是敏感的物流/客戶數據,評估時要把「數據出境」這一點考慮進去——這也恰好是你手寫版的一個真實優勢,面試時值得拿出來講。</div>
+    </div>
+
+    <div class="day">
+      <div class="day-top"><span class="day-no">DAY 4</span><h3>把第四週的評估搬進框架</h3><span class="day-time">~90 min</span></div>
+      <p class="day-desc">用你第四週親手建的那份評估數據集,跑一次 LangSmith 的 evaluate。你會看到框架把「數據集管理 + 跑測試 + LLM-as-judge + 結果對比」整合到了一起。因為你手寫過,你會很清楚它到底自動化了哪幾步。</p>
+      <span class="code-label">langsmith 版評估 — 對比第四週手寫的 run_eval.py</span>
+      <pre><code><span class="kw">from</span> langsmith <span class="kw">import</span> evaluate, Client
+
+<span class="kw">def</span> <span class="fn">correctness</span>(run, example):       <span class="cmt"># 確定性 sensor</span>
+    <span class="kw">return</span> {<span class="st">"key"</span>: <span class="st">"correct"</span>,
+            <span class="st">"score"</span>: run.outputs == example.outputs}
+
+results = <span class="fn">evaluate</span>(
+    <span class="kw">lambda</span> x: agent.invoke(x),
+    data=<span class="st">"logistics-evalset"</span>,        <span class="cmt"># 第四週那份數據集</span>
+    evaluators=[correctness, llm_judge],  <span class="cmt"># 確定性 + 推理式</span>
+)</code></pre>
+      <ul class="tasks">
+        <li><input type="checkbox" id="w5d4t1"><label for="w5d4t1">把第四週的數據集上傳成 LangSmith dataset。</label></li>
+        <li><input type="checkbox" id="w5d4t2"><label for="w5d4t2">跑 <code>evaluate()</code>,同時掛上確定性 evaluator 和 LLM-as-judge。</label></li>
+        <li><input type="checkbox" id="w5d4t3"><label for="w5d4t3">用框架的對比界面,把「手寫版 agent」和「框架版 agent」在同一份數據集上的分數並排比較。</label></li>
+      </ul>
+    </div>
+
+    <div class="day">
+      <div class="day-top"><span class="day-no">DAY 5</span><h3>寫對照案例:兩種都做過</h3><span class="day-time">~90 min</span></div>
+      <p class="day-desc">這是第五週真正的產物,也是整套訓練裡最有面試殺傷力的東西。把「手寫 vs 框架」的對比寫成一篇技術文章,展現你不只會用工具,更懂得權衡(trade-off)。</p>
+      <ul class="tasks">
+        <li><input type="checkbox" id="w5d5t1"><label for="w5d5t1">寫一節 <strong>「框架幫我省了什麼」</strong>:agent loop、tool dispatch、狀態持久化、可觀測性、評估整合——用行數和時間量化。</label></li>
+        <li><input type="checkbox" id="w5d5t2"><label for="w5d5t2">寫一節 <strong>「框架藏了什麼」</strong>:重試策略、成本控制點、數據出境、調試(debug)時的黑盒問題——這些你手寫過,所以才看得見。</label></li>
+        <li><input type="checkbox" id="w5d5t3"><label for="w5d5t3">寫一節 <strong>「我會怎麼選」</strong>:什麼情況用裸 SDK(輕量、可控、數據敏感)、什麼情況用框架(快、多 agent、需要持久化和團隊協作)。</label></li>
+        <li><input type="checkbox" id="w5d5t4"><label for="w5d5t4">把兩個版本都放進同一個 GitHub 倉庫(<code>/raw</code> 和 <code>/framework</code> 兩個目錄),README 鏈接到這篇對照文章。</label></li>
+      </ul>
+      <div class="checkpoint">
+        <div class="t">✓ 本週完成標準</div>
+        <p>你有了同一個物流 agent 的兩個版本(手寫 + 框架),以及一篇能講清楚「框架省了什麼、藏了什麼、我會怎麼選」的對照文章。這正是把你和「只會拼 LangChain」的人區分開來的東西。</p>
+        <div class="deliverable"><strong>產物:</strong>雙版本 GitHub 倉庫 + 「手寫 vs 框架」技術對照文章。</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FINAL -->
+<section class="final">
+  <div class="wrap">
+    <h2>35 天之後:把它變成機會</h2>
+    <p>五週走完,你手裡的不只是一個玩具項目(toy project),而是一個能對應到真實招聘要求、而且「兩種都做過」的作品。接下來把它「翻譯」成市場語言:</p>
+    <p><strong>重寫你的賣點。</strong>別說「我做過一個 AI agent」,要說「我為 LLM 系統搭建了完整的 harness——帶指數退避的重試、結構化可觀測性、優雅降級、用精確率/召回率和 LLM-as-judge 的評估流水線,而且裸 SDK 和 LangChain/LangGraph 兩種實現都做過、能講清楚取捨」。後者才是把你和只會寫 prompt 的新手徹底區分開的那句話。</p>
+    <p><strong>用對的關鍵詞找機會。</strong>市場上幾乎沒人用「Harness Engineer」當職位名稱,你的作品要去對應這些:</p>
+    <div class="pill-row">
+      <span class="pill">AI Agent Engineer</span>
+      <span class="pill">Agentic AI Engineer</span>
+      <span class="pill">LLM Engineer</span>
+      <span class="pill">LLM Integration Engineer</span>
+      <span class="pill">AI Reliability Engineer</span>
+      <span class="pill">Senior AI Engineer · production</span>
+    </div>
+    <p><strong>面試時把這個項目當答案庫。</strong>「你怎麼處理 agent 失敗?」「怎麼控成本?」「怎麼給非確定性系統做測試?」「為什麼選/不選 LangGraph?」——這些高頻問題,你都能直接指著這 35 天做的東西來回答,而不是空談。</p>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <p class="mono">REFERENCE</p>
+    <p>Martin Fowler / Birgitta Böckeler · <a href="https://martinfowler.com/articles/harness-engineering.html">Harness engineering for coding agent users</a></p>
+    <p>LangChain · <a href="https://blog.langchain.com/langchain-langgraph-1dot0/">LangChain &amp; LangGraph 1.0</a></p>
+    <p style="margin-top:24px; color:var(--ink-faint);">為 Jerome 整理 · Harness Engineering 五週實戰手冊 · 2026</p>
+  </div>
+</footer>
+
+<script>
+  (function () {
+    var boxes = Array.prototype.slice.call(document.querySelectorAll('.tasks input[type="checkbox"]'));
+    var fill = document.getElementById('barFill');
+    var pct = document.getElementById('barPct');
+    function update() {
+      var done = boxes.filter(function (b) { return b.checked; }).length;
+      var p = boxes.length ? Math.round((done / boxes.length) * 100) : 0;
+      fill.style.width = p + '%';
+      pct.textContent = p + '%';
+    }
+    boxes.forEach(function (b) { b.addEventListener('change', update); });
+    update();
+  })();
+</script>
+
+</body>
+</html>

@@ -4,7 +4,7 @@
 
 使用方法：在每個子文件夾的代碼開頭加上以下兩行：
     import sys, os
-    sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+    sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
     from config import setup_anthropic_env, DEFAULT_MODEL
     setup_anthropic_env()
 

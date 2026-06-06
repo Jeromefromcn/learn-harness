@@ -4,10 +4,23 @@ Week 1–5 的練習代碼，使用 DeepSeek API（Anthropic 兼容接口）。
 
 ## 快速開始
 
-### 1. 安裝依賴
+### 1. 建立虛擬環境（避免污染主環境）
 
 ```bash
-pip install anthropic python-dotenv langchain langchain-openai langgraph langsmith
+python3 -m venv .venv
+source .venv/bin/activate   # Windows 用 .venv\Scripts\activate
+```
+
+### 2. 安裝依賴
+
+```bash
+pip install -r requirements.txt
+```
+
+額外依賴（Week 5 才需要）：
+
+```bash
+pip install langchain langchain-openai langgraph langsmith
 ```
 
 ### 2. 配置 API Keys
