@@ -194,5 +194,5 @@ def print_gap_analysis(assessments: list[ComponentAssessment]):
 if __name__ == "__main__":
     print_gap_analysis(MY_SYSTEM_STATUS)
     print("\n" + "=" * 60)
-    print("下一步:把"全新"的組件,按 priority_week 的順序攻克.")
+    print('下一步:把"全新"的組件,按 priority_week 的順序攻克.')
     print("Week 2 開始,第一行真正的代碼在 week2_day1/tools.py.")

@@ -114,7 +114,7 @@ def test_tool_returns_nothing():
     print("\n工具返回空 dict,看模型是否幻覺出庫存數字:")
     result = run_agent("SKU-1 還有多少庫存?", verbose=False)
     print(f"\n-> agent 回答:{result[:200]}")
-    print("  觀察:模型說了什麼?是否承認"沒有拿到有用信息"?")
+    print('  觀察:模型說了什麼?是否承認"沒有拿到有用信息"?')
 
     tools_module.check_inventory = original_fn
 
@@ -166,7 +166,7 @@ FAILURE_MODES: list[dict] = [
         "name": "問題模糊 -> 模型不請求工具",
         "trigger": "沒有具體追蹤號/SKU 的問題",
         "current_behavior": "模型通常會反問,但偶爾會瞎猜",
-        "solution": "Week 4:在評估集裡加入"模糊問題"類別",
+        "solution": 'Week 4:在評估集裡加入"模糊問題"類別',
         "sensor_type": "inferential",
     },
     {

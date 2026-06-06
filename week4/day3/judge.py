@@ -222,5 +222,5 @@ if __name__ == "__main__":
         print("思考:是哪個評分標準有歧義?嘗試修改 JUDGE_PROMPT.")
 
     print("\nDay 3 完成.")
-    print("核心洞察:LLM-as-judge 帶概率性,但它讓"語義質量"變得可追蹤.")
+    print('核心洞察:LLM-as-judge 帶概率性,但它讓"語義質量"變得可追蹤.')
     print("下一步:week4_day4/run_eval.py - 串成完整評估流水線.")
